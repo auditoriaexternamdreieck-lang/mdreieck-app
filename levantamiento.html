@@ -145,7 +145,7 @@ input[type=file]{display:none}
   </div>
   <div class="nav">
     <a href="index.html" class="btn-out">← Inicio</a>
-    <button class="btn-main" onclick="goP(2)">Materiales →</button>
+    <a href="#" class="btn-main" id="go2" style="text-decoration:none">Materiales →</a>
   </div>
 </div>
 
@@ -189,8 +189,8 @@ input[type=file]{display:none}
     </div>
   </div>
   <div class="nav">
-    <button class="btn-out" onclick="goP(1)">← Anterior</button>
-    <button class="btn-main" onclick="goP(3)">Inmueble →</button>
+    <a href="#" class="btn-out" id="go1b" style="text-decoration:none;border:1px solid #ddd">← Anterior</a>
+    <a href="#" class="btn-main" id="go3" style="text-decoration:none">Inmueble →</a>
   </div>
 </div>
 
@@ -242,8 +242,8 @@ input[type=file]{display:none}
     <div class="fg"><label>Observaciones</label><textarea id="f_obs" placeholder="Observaciones relevantes..."></textarea></div>
   </div>
   <div class="nav">
-    <button class="btn-out" onclick="goP(2)">← Anterior</button>
-    <button class="btn-main" onclick="goP(4)">Fotos y firma →</button>
+    <a href="#" class="btn-out" id="go2b" style="text-decoration:none;border:1px solid #ddd">← Anterior</a>
+    <a href="#" class="btn-main" id="go4" style="text-decoration:none">Fotos y firma →</a>
   </div>
 </div>
 
@@ -269,9 +269,9 @@ input[type=file]{display:none}
     <button style="background:#fff;color:#333;border:1px solid #ddd;border-radius:10px;padding:8px 14px;font-size:12px;cursor:pointer;margin-top:6px;font-family:inherit" onclick="clearSig()">🗑️ Borrar firma</button>
   </div>
   <div style="padding:0 16px">
-    <button class="btn-main" style="width:100%;margin-bottom:8px" onclick="genPrev()">📄 Generar formato e imprimir</button>
+    <a href="#" class="btn-main" id="goprev" style="width:100%;margin-bottom:8px;text-decoration:none;display:flex;align-items:center;justify-content:center">📄 Generar formato e imprimir</a>
     <button class="btn-green" id="bsave" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;border:none;margin-bottom:8px" onclick="guardar()">☁️ Guardar en Sheets + Drive</button>
-    <button class="btn-out" style="width:100%;display:flex;align-items:center;justify-content:center;padding:11px;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;border:1px solid #ddd;background:#fff" onclick="goP(3)">← Anterior</button>
+    <a href="#" class="btn-out" id="go3c" style="width:100%;display:flex;align-items:center;justify-content:center;padding:11px;border-radius:10px;font-size:14px;text-decoration:none;border:1px solid #ddd;background:#fff;color:#333">← Anterior</a>
   </div>
 </div>
 
@@ -306,7 +306,7 @@ input[type=file]{display:none}
   <div class="sr"><div class="sb">FIRMA DEL CLIENTE</div><div class="sb">POR MDREIECK S.A. DE C.V.</div></div>
   </div>
   <div style="padding:0 16px">
-    <button class="btn-main" style="width:100%;margin-bottom:8px" onclick="imprimir()">🖨️ Imprimir / guardar PDF</button>
+    <a href="#" class="btn-main" id="goprint" style="width:100%;margin-bottom:8px;text-decoration:none;display:flex;align-items:center;justify-content:center">🖨️ Imprimir / guardar PDF</a>
     <button class="btn-green" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;border:none;margin-bottom:8px" onclick="guardar()">☁️ Guardar en Sheets + Drive</button>
     <a href="index.html" class="btn-out" style="display:flex;align-items:center;justify-content:center;padding:11px;border-radius:10px;font-size:14px;text-decoration:none;border:1px solid #ddd;background:#fff;color:#333">🏠 Nuevo formulario</a>
   </div>
@@ -405,6 +405,29 @@ function imprimir(){
   w.document.write('<!DOCTYPE html><html><head><title>Levantamiento #'+folio+'</title><style>body{font-family:Arial,sans-serif;padding:20px;font-size:10px}table{width:100%;border-collapse:collapse}td,th{border:0.5px solid #aaa;padding:2px 4px}.ph{display:flex;align-items:center;gap:8px;border-bottom:2px solid #1a1080;padding-bottom:7px;margin-bottom:5px}.pl{width:65px;height:35px;object-fit:contain}.pc h3{font-size:12px;font-weight:bold;color:#1a1080}.pc p{font-size:7px;color:#555;margin:1px 0}.pf{background:#1a1080;color:#fff;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:bold}.st{font-weight:bold;font-size:10px;background:#1a1080;color:#fff;padding:2px 4px;margin:4px 0 2px}.sr{display:flex;gap:12px;margin-top:10px}.sb{flex:1;border-top:2px solid #1a1080;padding-top:3px;text-align:center;font-size:9px;color:#1a1080;font-weight:bold}</style></head><body>'+c+'<br><button onclick="window.print()" style="padding:10px 20px;margin-top:10px;background:#1a1080;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer">🖨️ Imprimir</button></body></html>');
   w.document.close();
 }
+
+// Navigation listeners - works on all Android
+function tap(id, fn) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('click', function(e) { e.preventDefault(); fn(); });
+  el.addEventListener('touchend', function(e) { e.preventDefault(); fn(); });
+}
+document.addEventListener('DOMContentLoaded', function() {
+  tap('go2', function(){ goP(2); });
+  tap('go1b', function(){ goP(1); });
+  tap('go3', function(){ goP(3); });
+  tap('go2b', function(){ goP(2); });
+  tap('go4', function(){ goP(4); });
+  tap('go3b', function(){ goP(3); });
+  tap('go3c', function(){ goP(3); });
+  tap('goprev', function(){ genPrev(); });
+  tap('goprint', function(){ imprimir(); });
+  tap('bsave', function(){ guardar(); });
+  v('f_fecha').value = new Date().toISOString().split('T')[0];
+  v('pv-f').textContent = folio;
+});
+
 </script>
 </body>
 </html>
