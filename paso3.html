@@ -56,7 +56,7 @@ input[type=file]{display:none}
 <div class="fg"><label>Horario instalación</label><input type="text" id="c7" placeholder="8:00-18:00"></div>
 <div class="fg"><label>DC3</label><select id="c8"><option>No</option><option>Sí</option></select></div></div>
 <div class="card"><h2>Estructura del inmueble</h2>
-<div class="fg"><label>Tipo de plafón</label><div class="cr"><label class="ci"><input type="radio" name="pl" value="Corrido"> Corrido</label><label class="ci"><input type="radio" name="pl" value="Modular"> Modular</label><label class="ci"><input type="radio" name="pl" value="Sin plafón"> Sin plafón</label></div></div>
+<div class="fg"><label>Tipo de plafón</label><select id="c_plafon"><option value="">Seleccionar</option><option value="Corrido">Corrido</option><option value="Modular">Modular</option><option value="Sin plafón">Sin plafón</option></select></div>
 <div class="r2"><div class="fg"><label>Ductos eléctricos</label><select id="c9"><option>No</option><option>Sí</option></select></div><div class="fg"><label>Planos</label><select id="c10"><option>No</option><option>Sí</option></select></div></div>
 <div class="r2"><div class="fg"><label>Altura inmueble (m)</label><input type="number" id="c11" placeholder="0" min="0"></div><div class="fg"><label>Altura inst. (m)</label><input type="number" id="c12" placeholder="0" min="0"></div></div>
 <div class="fg"><label>Tipo de inmueble</label><input type="text" id="c13" placeholder="Oficinas, bodega..."></div>
@@ -76,8 +76,8 @@ document.getElementById('nx').addEventListener('click',function(e){
   if(document.getElementById('e7').checked)escs.push('7');
   if(document.getElementById('e11').checked)escs.push('11');
   if(document.getElementById('e24').checked)escs.push('24');
-  var pl=document.querySelector('input[name="pl"]:checked');
-  var d={epp_basico:document.getElementById('c1').value,epp_especifico:document.getElementById('c2').value,obra_civil:document.getElementById('c3').value,area_confinada:document.getElementById('c4').value,escaleras:escs.join(',')||'Ninguna',plataforma:document.getElementById('c5').value,andamio:document.getElementById('c6').value,horario:document.getElementById('c7').value,dc3:document.getElementById('c8').value,tipo_plafon:pl?pl.value:'—',ductos:document.getElementById('c9').value,planos:document.getElementById('c10').value,altura_inmueble:document.getElementById('c11').value,altura_instalacion:document.getElementById('c12').value,tipo_inmueble:document.getElementById('c13').value,permisos:document.getElementById('c16').value,acceso_azotea:document.getElementById('c14').value,estacionamiento:document.getElementById('c15').value,observaciones:document.getElementById('c17').value};
+  var plEl=document.getElementById('c_plafon');
+  var d={epp_basico:document.getElementById('c1').value,epp_especifico:document.getElementById('c2').value,obra_civil:document.getElementById('c3').value,area_confinada:document.getElementById('c4').value,escaleras:escs.join(',')||'Ninguna',plataforma:document.getElementById('c5').value,andamio:document.getElementById('c6').value,horario:document.getElementById('c7').value,dc3:document.getElementById('c8').value,tipo_plafon:plEl?plEl.value:'—',ductos:document.getElementById('c9').value,planos:document.getElementById('c10').value,altura_inmueble:document.getElementById('c11').value,altura_instalacion:document.getElementById('c12').value,tipo_inmueble:document.getElementById('c13').value,permisos:document.getElementById('c16').value,acceso_azotea:document.getElementById('c14').value,estacionamiento:document.getElementById('c15').value,observaciones:document.getElementById('c17').value};
   sessionStorage.setItem('p3',JSON.stringify(d));
   window.location.href='paso4.html';
 });
