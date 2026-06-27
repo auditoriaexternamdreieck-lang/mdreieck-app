@@ -69,7 +69,7 @@ input[type=file]{display:none}
 <a href="paso3.html" class="wbtn bo" style="border:1px solid #ddd">Anterior</a>
 </div>
 <script>
-var SURL="https://script.google.com/macros/s/AKfycby7mu4-C98k4ymmJLI6PH1x_N-Z8Ff8uRjbv2D0_dI_GwFtH5G8KiM1ZWkvLu7erU23/exec";
+var SURL="https://script.google.com/macros/s/AKfycbzc7JwrCRQEvxmtyc8Co6cXjnetorxfaFAhdt-qFhSasYFQwBAh8Tc6h0IFlUVyjj3T/exec";
 var RL=["","Deficiente","Regular","Bueno","Muy bueno","Excelente"];
 var rating=0,photos=[],pc=0,folio=8277;
 function gt(id){return document.getElementById(id);}
@@ -136,9 +136,27 @@ gt('b1').addEventListener('click',function(e){
 });
 gt('b2').addEventListener('click',function(e){
   e.preventDefault();
-  var btn=gt('b2');btn.textContent='Guardando...';
-  fetch(SURL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(getAllData())})
-    .then(function(){showT('Guardado en Sheets y Drive');folio++;btn.textContent='Guardado';btn.style.background='#145c2f';})
-    .catch(function(err){showT('Error',false);btn.textContent='Reintentar';});
+  var btn=gt('b2');
+  btn.disabled=true;
+  btn.innerHTML='<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite"></span> Guardando...';
+  var d=getAllData();
+  fetch(SURL,{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(res.folio){
+        folio=res.folio;
+        sessionStorage.setItem('folio_servidor',''+folio);
+      }
+      showT('Guardado en Sheets y Drive');
+      btn.disabled=false;
+      btn.innerHTML='✅ Guardado — Folio #'+folio;
+      btn.style.background='#145c2f';
+    })
+    .catch(function(err){
+      // no-cors fallback
+      fetch(SURL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)})
+        .then(function(){showT('Guardado correctamente');btn.disabled=false;btn.innerHTML='✅ Guardado';btn.style.background='#145c2f';})
+        .catch(function(){showT('Error al guardar',false);btn.disabled=false;btn.innerHTML='Reintentar';});
+    });
 });
 </script></body></html>

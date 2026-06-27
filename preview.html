@@ -83,7 +83,7 @@ input[type=file]{display:none}
 <a href="index.html" class="wbtn bo" style="border:1px solid #ddd">Nuevo formulario</a>
 </div>
 <script>
-var SURL="https://script.google.com/macros/s/AKfycby7mu4-C98k4ymmJLI6PH1x_N-Z8Ff8uRjbv2D0_dI_GwFtH5G8KiM1ZWkvLu7erU23/exec";
+var SURL="https://script.google.com/macros/s/AKfycbzc7JwrCRQEvxmtyc8Co6cXjnetorxfaFAhdt-qFhSasYFQwBAh8Tc6h0IFlUVyjj3T/exec";
 function gt(id){return document.getElementById(id);}
 function showT(m,ok){var t=gt('toast');t.textContent=m;t.className='toast '+(ok===false?'err':'')+' show';setTimeout(function(){t.className='toast';},4000);}
 var pv=JSON.parse(sessionStorage.getItem('preview')||'{}');
@@ -108,10 +108,26 @@ gt('bp').addEventListener('click',function(e){
 });
 gt('bs').addEventListener('click',function(e){
   e.preventDefault();
-  var btn=gt('bs');btn.textContent='Guardando...';
+  var btn=gt('bs');
+  btn.disabled=true;
+  btn.textContent='Guardando...';
   var d=JSON.parse(sessionStorage.getItem('alldata')||'{}');
-  fetch(SURL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)})
-    .then(function(){showT('Guardado en Sheets y Drive');btn.textContent='Guardado';btn.style.background='#145c2f';})
-    .catch(function(err){showT('Error',false);btn.textContent='Reintentar';});
+  fetch(SURL,{method:'POST',mode:'cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      var f=res.folio||'';
+      showT('Guardado — Folio #'+f);
+      btn.disabled=false;
+      btn.innerHTML='✅ Folio #'+f+' guardado';
+      btn.style.background='#145c2f';
+      // Update folio shown on page
+      var pf=document.getElementById('pf');if(pf&&f)pf.textContent=f;
+    })
+    .catch(function(){
+      var d2=JSON.parse(sessionStorage.getItem('alldata')||'{}');
+      fetch(SURL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(d2)})
+        .then(function(){showT('Guardado correctamente');btn.disabled=false;btn.textContent='✅ Guardado';btn.style.background='#145c2f';})
+        .catch(function(){showT('Error al guardar',false);btn.disabled=false;btn.textContent='Reintentar';});
+    });
 });
 </script></body></html>
