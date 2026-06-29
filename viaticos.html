@@ -123,8 +123,10 @@
     <input type="text" id="tipoServicio" placeholder="Ej: Cambio de tarjetas en equipos de alertamiento">
     <label>Nombre del cliente</label>
     <input type="text" id="cliente" placeholder="Ej: Municipio de Puebla">
-    <label>Observaciones</label>
-    <textarea id="observaciones" placeholder="Ej: Acudirán 3 personas, área de sistemas y laboratorio"></textarea>
+    <label>Número de personas que viajan</label>
+    <input type="number" id="personas" value="1" min="1" max="50" oninput="recalcular()">
+    <label>Observaciones (áreas, detalles adicionales)</label>
+    <textarea id="observaciones" placeholder="Ej: 2 de laboratorio, 2 de sistemas"></textarea>
   </div>
 
   <!-- ② DATOS BANCARIOS -->
@@ -199,19 +201,13 @@
     <p class="note info" style="margin-top:8px">El total se multiplica × 2 (ida y vuelta) automáticamente.</p>
   </div>
 
-  <!-- ⑤ DATOS DEL VIAJE -->
-  <div class="card">
-    <div class="card-title">👥 Datos del viaje</div>
-    <div class="row2">
-      <div>
-        <label>Número de personas</label>
-        <input type="number" id="personas" value="1" min="1" max="50" oninput="recalcular()">
-      </div>
-      <div>
-        <label>Número de días</label>
-        <input type="number" id="dias" value="1" min="1" max="30" oninput="recalcular()">
-      </div>
+  <!-- Días calculado automático desde fechas, personas desde datos del solicitante -->
+  <div class="card" style="padding:12px 16px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--muted)">📅 Días del viaje (automático)</span>
+      <span style="font-size:18px;font-weight:800;color:var(--accent2)" id="diasBadge">1 día</span>
     </div>
+    <input type="number" id="dias" value="1" min="1" readonly style="display:none;">
   </div>
 
   <!-- ⑥ ALIMENTACIÓN -->
@@ -241,13 +237,19 @@
   <!-- ⑦ HOSPEDAJE -->
   <div class="card">
     <div class="card-title">🏨 Hospedaje (Airbnb)</div>
-    <p class="note" style="margin-bottom:12px">Ingresa el costo <b>total del Airbnb</b> para todo el grupo y todas las noches. Consulta disponibilidad en el botón de abajo.</p>
-    <label>Costo total del Airbnb ($) — todas las noches, todo el grupo</label>
-    <input type="number" id="hospedaje" value="0" min="0" step="100" oninput="recalcular()" placeholder="Ej: 3600">
-    <div style="margin-top:10px">
-      <label>Noches (se calcula automático)</label>
-      <input type="number" id="noches" value="0" min="0" readonly style="opacity:.6;cursor:not-allowed;">
+    <p class="note" style="margin-bottom:12px">Ingresa el costo por noche del Airbnb y selecciona qué noches aplica hospedaje.</p>
+    <div class="row2">
+      <div>
+        <label>Costo por noche ($)</label>
+        <input type="number" id="costoNoche" value="0" min="0" step="100" oninput="renderNoches()" placeholder="Ej: 1200">
+      </div>
+      <div>
+        <label>Noches seleccionadas</label>
+        <input type="number" id="nochesTotal" value="0" min="0" readonly style="opacity:.6;cursor:not-allowed;">
+      </div>
     </div>
+    <div id="nochesContainer" style="margin-top:10px"></div>
+    <div class="note info" style="margin-top:8px" id="totalHospNote">—</div>
     <a id="btnAirbnb" href="https://www.airbnb.mx" target="_blank"
        style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;
               padding:11px;background:transparent;border:1px solid #ff5a5f;color:#ff5a5f;
@@ -567,20 +569,27 @@
   function recalcular() {
     const personas    = parseInt(document.getElementById('personas').value)         || 1;
     const dias        = parseInt(document.getElementById('dias').value)              || 1;
-    const hospTotal   = parseFloat(document.getElementById('hospedaje').value)       || 0;
+    const { total: hospTotal, noches: nochesSelec } = calcularHospedaje();
     const estacion    = parseFloat(document.getElementById('estacionamiento').value) || 0;
     const imprevistos = parseFloat(document.getElementById('imprevistos').value)     || 0;
     const numCasetas  = parseInt(document.getElementById('numCasetas').value)        || 0;
     const precioCas   = parseFloat(document.getElementById('precioCaseta').value)    || 0;
     const noches      = Math.max(dias - 1, 0);
 
-    document.getElementById('noches').value = noches;
+    // noches se actualiza en calcularHospedaje
 
     // Actualizar link Airbnb con destino
     const destino = document.getElementById('destino').value.trim();
     if (destino) {
-      document.getElementById('btnAirbnb').href =
-        `https://www.airbnb.mx/s/${encodeURIComponent(destino)}/homes`;
+      const btnAb = document.getElementById('btnAirbnb');
+      if (btnAb) btnAb.href = `https://www.airbnb.mx/s/${encodeURIComponent(destino)}/homes`;
+    }
+
+    // Nota hospedaje
+    const hospNote = document.getElementById('totalHospNote');
+    if (hospNote) {
+      const { total: ht, noches: ns } = calcularHospedaje();
+      hospNote.textContent = `Total hospedaje: ${fmt(ht)} · ${ns} noche(s) × ${fmt(parseFloat(document.getElementById('costoNoche').value)||0)}`;
     }
 
     if (kmCalculados > 0) {
@@ -610,7 +619,7 @@
     document.getElementById('montoCasetas').textContent   = fmt(totalCasetas);
     document.getElementById('descAlim').textContent       = resumenAlimentacion() || `${dias} día(s)`;
     document.getElementById('montoAlim').textContent      = fmt(alim);
-    document.getElementById('descHospDesg').textContent   = `Airbnb total ${noches} noche(s) · ${personas} persona(s)`;
+    document.getElementById('descHospDesg').textContent   = resumenNoches();
     document.getElementById('montoHosp').textContent      = fmt(hospTotal);
     document.getElementById('descTransporte').textContent = resumenTransporte();
     document.getElementById('montoTransporte').textContent = fmt(trans);
@@ -627,12 +636,11 @@
   function getDatos() {
     const personas    = parseInt(document.getElementById('personas').value)       || 1;
     const dias        = parseInt(document.getElementById('dias').value)            || 1;
-    const hospTotal   = parseFloat(document.getElementById('hospedaje').value)       || 0;
+    const { total: hospTotal, noches } = calcularHospedaje();
     const estacion    = parseFloat(document.getElementById('estacionamiento').value) || 0;
     const imprevistos = parseFloat(document.getElementById('imprevistos').value)     || 0;
     const numCasetas  = parseInt(document.getElementById('numCasetas').value)        || 0;
     const precioCas   = parseFloat(document.getElementById('precioCaseta').value)    || 0;
-    const noches      = Math.max(dias - 1, 0);
     const totalCasetas = numCasetas * precioCas * 2;
     const alim        = calcularAlimentacion();
     const hosp        = hospTotal;
@@ -747,7 +755,7 @@
       ['Gasolina (ida y vuelta)', `${d.km} km · $${(parseFloat(document.getElementById('precioGas').value)||24.5).toFixed(2)}/L`, d.gasolina],
       ['Casetas', `${d.numCasetas} caseta(s) x $${d.precioCas} x 2 viajes`, d.casetas],
       ['Alimentacion', resumenAlimentacion() || `${d.dias} dia(s)`, d.alimentacion],
-      ['Hospedaje (Airbnb)', `Total ${d.noches} noche(s) · ${d.personas} persona(s)`, d.hospedaje],
+      ['Hospedaje (Airbnb)', `${d.noches} noche(s) · $${(parseFloat(document.getElementById('costoNoche').value)||0).toFixed(2)}/noche`, d.hospedaje],
       ['Transporte local (Uber/Taxi)', resumenTransporte(), d.transporte],
       ['Estacionamiento', `${d.dias} dia(s)`, d.estacionamiento],
       ['Imprevistos / varios', `${d.dias} dia(s)`, d.imprevistos],
@@ -855,17 +863,105 @@
     setTimeout(() => { el.className=''; }, 3500);
   }
 
+  // ── CALCULAR DÍAS AUTOMÁTICO ────────────────────────────
+  function calcularDias() {
+    const ini = document.getElementById('fechaInicio').value;
+    const fin = document.getElementById('fechaFin').value;
+    if (ini && fin) {
+      const d1 = new Date(ini);
+      const d2 = new Date(fin);
+      const diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+      const dias = Math.max(diff + 1, 1);
+      document.getElementById('dias').value = dias;
+      const badge = document.getElementById('diasBadge');
+      if (badge) badge.textContent = `${dias} día(s)`;
+    }
+    renderDias();
+    renderNoches();
+  }
+
+  // ── RENDER NOCHES HOSPEDAJE ──────────────────────────────
+  function renderNoches() {
+    const ini  = document.getElementById('fechaInicio').value;
+    const fin  = document.getElementById('fechaFin').value;
+    const cont = document.getElementById('nochesContainer');
+    const costo = parseFloat(document.getElementById('costoNoche').value) || 0;
+    if (!cont) return;
+
+    // Guardar estado previo
+    const prev = {};
+    cont.querySelectorAll('.noche-row').forEach(row => {
+      prev[row.dataset.noche] = row.querySelector('.chk-noche').checked;
+    });
+
+    cont.innerHTML = '';
+    if (!ini || !fin) return;
+
+    const d1 = new Date(ini);
+    const d2 = new Date(fin);
+    const diffDias = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+    if (diffDias <= 0) return; // sin noches si es mismo día
+
+    const diasSemana = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+    for (let i = 0; i < diffDias; i++) {
+      const fechaNoche = new Date(d1);
+      fechaNoche.setDate(d1.getDate() + i);
+      const fechaSig   = new Date(fechaNoche);
+      fechaSig.setDate(fechaNoche.getDate() + 1);
+
+      const keyNoche = i + 1;
+      const checkedPrev = prev[keyNoche] !== undefined ? prev[keyNoche] : true; // default checked
+
+      const label = `${diasSemana[fechaNoche.getDay()]} ${fechaNoche.getDate()} ${meses[fechaNoche.getMonth()]} → ${diasSemana[fechaSig.getDay()]} ${fechaSig.getDate()} ${meses[fechaSig.getMonth()]}`;
+
+      const row = document.createElement('div');
+      row.className = 'noche-row';
+      row.dataset.noche = keyNoche;
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap';
+      row.innerHTML = `
+        <span style="font-size:12px;font-weight:700;color:var(--accent2);min-width:30px">N${keyNoche}</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text);cursor:pointer;margin:0;flex:1">
+          <input type="checkbox" class="chk-noche" ${checkedPrev?'checked':''} onchange="recalcular()"
+            style="width:16px;height:16px;accent-color:var(--accent)">
+          ${label}
+          <span style="color:var(--muted);margin-left:auto">${fmt(costo)}</span>
+        </label>`;
+      cont.appendChild(row);
+    }
+    recalcular();
+  }
+
+  function calcularHospedaje() {
+    const costo = parseFloat(document.getElementById('costoNoche').value) || 0;
+    let noches = 0;
+    document.querySelectorAll('.chk-noche').forEach(chk => { if (chk.checked) noches++; });
+    document.getElementById('nochesTotal').value = noches;
+    return { total: costo * noches, noches };
+  }
+
+  function resumenNoches() {
+    const items = document.querySelectorAll('.noche-row');
+    if (!items.length) return '—';
+    let sel = 0;
+    document.querySelectorAll('.chk-noche').forEach(c => { if (c.checked) sel++; });
+    return `${sel} noche(s) seleccionada(s)`;
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const hoy = new Date().toISOString().split('T')[0];
     document.getElementById('fechaInicio').value = hoy;
     document.getElementById('fechaFin').value = hoy;
-    renderDias();
+    calcularDias();
     ['rendimiento','precioGas','estacionamiento','imprevistos'].forEach(id => {
       document.getElementById(id).addEventListener('input', recalcular);
     });
-    // Re-render días al cambiar número de días o personas
-    document.getElementById('dias').addEventListener('input', renderDias);
+    // Calcular días automático al cambiar fechas
+    document.getElementById('fechaInicio').addEventListener('change', calcularDias);
+    document.getElementById('fechaFin').addEventListener('change', calcularDias);
     document.getElementById('personas').addEventListener('input', recalcular);
+    document.getElementById('costoNoche').addEventListener('input', renderNoches);
   });
 </script>
 </body>
