@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <title>Viáticos · M Dreieck</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       --bg: #0e0e1a;
@@ -24,10 +25,8 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding-bottom: 40px;
+      padding-bottom: 80px;
     }
-
-    /* ── HEADER ── */
     header {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
@@ -39,14 +38,17 @@
       top: 0;
       z-index: 100;
     }
-    header img { width: 36px; height: 36px; border-radius: 8px; }
-    header h1 { font-size: 16px; font-weight: 700; color: var(--text); }
+    header div { display: flex; flex-direction: column; }
+    header h1 { font-size: 16px; font-weight: 700; }
     header p  { font-size: 11px; color: var(--muted); }
-
-    /* ── MAIN ── */
+    .logo {
+      width: 38px; height: 38px;
+      background: #1a1080;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 14px; color: #fff; letter-spacing: -1px;
+    }
     main { padding: 16px; max-width: 520px; margin: 0 auto; }
-
-    /* ── SECTION CARDS ── */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -55,27 +57,16 @@
       margin-bottom: 14px;
     }
     .card-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--accent);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--accent); margin-bottom: 14px;
     }
-
-    /* ── FORM ELEMENTS ── */
     label {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 4px;
-      margin-top: 12px;
+      display: block; font-size: 12px;
+      color: var(--muted); margin-bottom: 4px; margin-top: 12px;
     }
     label:first-of-type { margin-top: 0; }
-    input, select {
+    input, select, textarea {
       width: 100%;
       background: var(--input-bg);
       border: 1px solid var(--border);
@@ -86,57 +77,60 @@
       outline: none;
       transition: border-color .15s;
       -webkit-appearance: none;
+      font-family: inherit;
     }
-    input:focus, select:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 70px; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
     select option { background: var(--card); }
-
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
-    /* ── RUTA BUTTON ── */
+    /* RUTA */
     .btn-ruta {
-      width: 100%;
-      margin-top: 12px;
-      padding: 12px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      width: 100%; margin-top: 12px; padding: 12px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
       transition: opacity .15s;
     }
     .btn-ruta:active { opacity: .8; }
     .btn-ruta:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-maps {
+      width: 100%; margin-top: 10px; padding: 11px;
+      background: transparent;
+      border: 1px solid #34a853;
+      color: #34a853;
+      border-radius: 10px;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      display: none; align-items: center; justify-content: center; gap: 8px;
+      text-decoration: none;
+    }
+    .btn-maps.show { display: flex; }
 
-    /* ── RESULTADO RUTA ── */
     .ruta-result {
-      display: none;
-      margin-top: 12px;
+      display: none; margin-top: 12px;
       background: var(--bg);
       border: 1px solid var(--accent);
-      border-radius: 10px;
-      padding: 12px 14px;
+      border-radius: 10px; padding: 12px 14px;
     }
     .ruta-result.show { display: block; }
     .ruta-stat {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 0;
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 5px 0;
+      border-bottom: 1px solid var(--border);
     }
+    .ruta-stat:last-child { border-bottom: none; }
     .ruta-stat span:first-child { font-size: 12px; color: var(--muted); }
     .ruta-stat span:last-child  { font-size: 15px; font-weight: 700; color: var(--accent2); }
 
-    /* ── CONCEPTO ROW ── */
+    /* CASETAS */
+    .casetas-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .casetas-note { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+    /* DESGLOSE */
     .concepto {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       justify-content: space-between;
       padding: 10px 0;
       border-bottom: 1px solid var(--border);
@@ -145,106 +139,80 @@
     .concepto-info { flex: 1; }
     .concepto-label { font-size: 13px; font-weight: 600; }
     .concepto-desc  { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .concepto-monto {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--accent2);
-      text-align: right;
-      min-width: 100px;
-    }
+    .concepto-monto { font-size: 15px; font-weight: 700; color: var(--accent2); text-align: right; min-width: 100px; }
 
-    /* ── TOTAL ── */
+    /* TOTAL */
     .total-box {
       background: linear-gradient(135deg, #1a2a4a, #1a3a2a);
       border: 1px solid var(--accent);
-      border-radius: 14px;
-      padding: 20px 16px;
-      margin-bottom: 14px;
-      text-align: center;
+      border-radius: 14px; padding: 20px 16px;
+      margin-bottom: 14px; text-align: center;
     }
     .total-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
     .total-monto { font-size: 36px; font-weight: 800; color: var(--success); margin: 6px 0; }
     .total-sub   { font-size: 13px; color: var(--muted); }
 
-    /* ── GUARDAR ── */
-    .btn-guardar {
-      width: 100%;
-      padding: 16px;
-      background: var(--success);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: opacity .15s;
+    /* BOTONES ACCIÓN */
+    .btn-guardar, .btn-pdf, .btn-email {
+      width: 100%; padding: 15px;
+      border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: opacity .15s; margin-bottom: 10px;
     }
-    .btn-guardar:active { opacity: .8; }
-    .btn-guardar:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-guardar { background: var(--success); color: #fff; }
+    .btn-pdf     { background: #c0392b; color: #fff; }
+    .btn-email   { background: #8e44ad; color: #fff; }
+    .btn-guardar:active, .btn-pdf:active, .btn-email:active { opacity: .8; }
+    .btn-guardar:disabled, .btn-pdf:disabled, .btn-email:disabled { opacity: .5; cursor: not-allowed; }
 
-    /* ── TOAST ── */
+    /* TOAST */
     #toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
+      position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 20px;
-      font-size: 14px;
-      font-weight: 600;
-      transition: transform .3s ease;
-      z-index: 999;
-      white-space: nowrap;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 20px;
+      font-size: 14px; font-weight: 600;
+      transition: transform .3s ease; z-index: 999; white-space: nowrap;
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
     #toast.ok  { border-color: var(--success); color: var(--success); }
     #toast.err { border-color: var(--danger);  color: var(--danger); }
 
-    /* ── SPINNER ── */
+    /* SPINNER */
     .spinner {
       width: 16px; height: 16px;
       border: 2px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .6s linear infinite;
-      display: none;
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin .6s linear infinite; display: none;
     }
     .spinner.show { display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── NAV ── */
+    .error-msg { font-size: 12px; color: var(--danger); margin-top: 6px; display: none; }
+
     .nav-bottom {
-      display: flex;
-      justify-content: space-between;
+      display: flex; justify-content: space-between;
       padding: 12px 16px;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
+      background: var(--surface); border-top: 1px solid var(--border);
+      position: fixed; bottom: 0; left: 0; right: 0;
     }
     .nav-bottom a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      color: var(--muted); text-decoration: none;
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
     }
     .nav-bottom a:hover { color: var(--text); }
 
-    .error-msg { font-size: 12px; color: var(--danger); margin-top: 6px; display: none; }
-    .casetas-note { font-size: 11px; color: var(--muted); margin-top: 4px; }
-    a.capufe { color: var(--accent); font-size: 11px; }
+    .section-sep {
+      height: 1px; background: var(--border);
+      margin: 14px 0;
+    }
   </style>
 </head>
 <body>
 
 <header>
-  <!-- Mismo logo que tu app -->
-  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB5UlEQVR4Ae2WA2wkQRCGa9u2bdu2bdvWtW3btm3btvl+VXeSyWTn3b3LJv/LV7P7qqe6q6f/oiiKoiiKGpMQIqSUMy8h5Wq37n0NivDWgaIoS1EUpZRS2jAMgzFGKaWUUtq2LUIICSGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghZI0xxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghZI0xxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghZI0xxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghZI0xxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghZI0xxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghZI0xxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQghZY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjhBBCCCGEEEIIIYQQQghZY4wxhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghZI0xxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcb8AJSFpSKfHmkzAAAAAElFTkSuQmCC" alt="MD">
+  <div class="logo">MD</div>
   <div>
     <h1>Calculadora de Viáticos</h1>
     <p>M Dreieck S.A. de C.V.</p>
@@ -253,16 +221,59 @@
 
 <main>
 
-  <!-- ① RUTA -->
+  <!-- ① DATOS DEL SOLICITANTE -->
+  <div class="card">
+    <div class="card-title">👤 Datos del solicitante</div>
+    <label>Área solicitante</label>
+    <input type="text" id="area" placeholder="Ej: Infraestructura">
+    <label>Nombre de quien solicita</label>
+    <input type="text" id="solicitante" placeholder="Nombre completo">
+    <label>Nombre completo del trabajador (a quien se depositarán los viáticos)</label>
+    <input type="text" id="trabajador" placeholder="Nombre completo">
+    <div class="row2">
+      <div>
+        <label>Fecha inicio del viaje</label>
+        <input type="date" id="fechaInicio">
+      </div>
+      <div>
+        <label>Fecha fin del viaje</label>
+        <input type="date" id="fechaFin">
+      </div>
+    </div>
+    <label>Tipo de servicio / motivo del viaje</label>
+    <input type="text" id="tipoServicio" placeholder="Ej: Cambio de tarjetas en equipos de alertamiento">
+    <label>Nombre del cliente</label>
+    <input type="text" id="cliente" placeholder="Ej: Municipio de Puebla">
+    <label>Observaciones</label>
+    <textarea id="observaciones" placeholder="Ej: Acudirán 3 personas, área de sistemas y laboratorio"></textarea>
+  </div>
+
+  <!-- ② DATOS BANCARIOS -->
+  <div class="card">
+    <div class="card-title">🏦 Datos bancarios del trabajador</div>
+    <div class="row2">
+      <div>
+        <label>Banco</label>
+        <input type="text" id="banco" placeholder="Ej: Efecticard">
+      </div>
+      <div>
+        <label>Sucursal</label>
+        <input type="text" id="sucursal" placeholder="Opcional">
+      </div>
+    </div>
+    <label>No. de tarjeta</label>
+    <input type="text" id="tarjeta" placeholder="16 dígitos" maxlength="19">
+    <label>Cuenta CLABE interbancaria</label>
+    <input type="text" id="clabe" placeholder="18 dígitos" maxlength="18">
+  </div>
+
+  <!-- ③ RUTA -->
   <div class="card">
     <div class="card-title">🗺️ Ruta y distancia</div>
-
     <label>Ciudad / dirección de origen</label>
     <input type="text" id="origen" placeholder="Ej: Ciudad de México, CDMX">
-
     <label>Ciudad / dirección de destino</label>
-    <input type="text" id="destino" placeholder="Ej: Guadalajara, Jalisco">
-
+    <input type="text" id="destino" placeholder="Ej: Puebla, Puebla">
     <div class="row2" style="margin-top:12px">
       <div>
         <label>Rendimiento (km/L)</label>
@@ -273,47 +284,55 @@
         <input type="number" id="precioGas" value="24.50" min="1" step="0.01">
       </div>
     </div>
-
     <button class="btn-ruta" id="btnRuta" onclick="calcularRuta()">
       <span class="spinner" id="spinnerRuta"></span>
       <span id="btnRutaText">📍 Calcular ruta</span>
     </button>
     <div class="error-msg" id="errRuta">No se pudo calcular la ruta. Verifica las ciudades.</div>
 
+    <!-- Link a Google Maps con ruta precargada -->
+    <a class="btn-maps" id="btnMaps" href="#" target="_blank">
+      🗺️ Ver ruta en Google Maps (consulta casetas)
+    </a>
+
     <div class="ruta-result" id="rutaResult">
       <div class="ruta-stat">
-        <span>📏 Distancia total</span>
-        <span id="resKm">— km</span>
+        <span>📏 Distancia (ida)</span>
+        <span id="resKm">—</span>
       </div>
       <div class="ruta-stat">
-        <span>🕐 Tiempo estimado</span>
+        <span>🕐 Tiempo estimado (ida)</span>
         <span id="resTiempo">—</span>
       </div>
       <div class="ruta-stat">
-        <span>⛽ Litros necesarios</span>
-        <span id="resLitros">— L</span>
+        <span>⛽ Litros necesarios (ida y vuelta)</span>
+        <span id="resLitros">—</span>
       </div>
       <div class="ruta-stat">
         <span>💰 Costo gasolina (ida y vuelta)</span>
-        <span id="resCostoGas">$—</span>
+        <span id="resCostoGas">—</span>
       </div>
     </div>
   </div>
 
-  <!-- ② CASETAS -->
+  <!-- ④ CASETAS -->
   <div class="card">
     <div class="card-title">🛣️ Casetas</div>
-    <label>Costo total de casetas (ida y vuelta, $)</label>
-    <input type="number" id="casetas" value="0" min="0" step="10" placeholder="0">
-    <p class="casetas-note">
-      Consulta tarifas en:
-      <a class="capufe" href="https://www.capufe.gob.mx/tarifas" target="_blank">CAPUFE ↗</a>
-      &nbsp;·&nbsp;
-      <a class="capufe" href="https://www.google.com/maps" target="_blank">Google Maps ↗</a>
-    </p>
+    <p class="casetas-note">Consulta cuántas casetas hay en Google Maps y anota el precio por caseta.</p>
+    <div class="casetas-row">
+      <div>
+        <label>Número de casetas (ida)</label>
+        <input type="number" id="numCasetas" value="0" min="0" oninput="recalcular()">
+      </div>
+      <div>
+        <label>Precio por caseta ($)</label>
+        <input type="number" id="precioCaseta" value="0" min="0" step="10" oninput="recalcular()">
+      </div>
+    </div>
+    <p class="casetas-note" style="margin-top:8px">El total se calcula × 2 (ida y vuelta) automáticamente.</p>
   </div>
 
-  <!-- ③ VIAJE -->
+  <!-- ⑤ DATOS DEL VIAJE -->
   <div class="card">
     <div class="card-title">👥 Datos del viaje</div>
     <div class="row2">
@@ -328,7 +347,7 @@
     </div>
   </div>
 
-  <!-- ④ COSTOS POR PERSONA/DÍA -->
+  <!-- ⑥ ALIMENTACIÓN -->
   <div class="card">
     <div class="card-title">🍽️ Alimentación (por persona / día)</div>
     <div class="row3">
@@ -347,6 +366,7 @@
     </div>
   </div>
 
+  <!-- ⑦ HOSPEDAJE Y EXTRAS -->
   <div class="card">
     <div class="card-title">🏨 Hospedaje y extras</div>
     <div class="row2">
@@ -359,87 +379,82 @@
         <input type="number" id="estacionamiento" value="80" min="0" oninput="recalcular()">
       </div>
     </div>
-    <div style="margin-top:10px">
-      <label>Imprevistos / varios ($/día)</label>
-      <input type="number" id="imprevistos" value="200" min="0" oninput="recalcular()">
-    </div>
+    <label>Imprevistos / varios ($/día)</label>
+    <input type="number" id="imprevistos" value="200" min="0" oninput="recalcular()">
   </div>
 
-  <!-- ⑤ DESGLOSE -->
+  <!-- ⑧ DESGLOSE -->
   <div class="card">
     <div class="card-title">📊 Desglose total</div>
-
     <div class="concepto">
       <div class="concepto-info">
-        <div class="concepto-label">⛽ Gasolina (ida y vuelta)</div>
-        <div class="concepto-desc" id="descGas">Calculando ruta…</div>
+        <div class="concepto-label">⛽ Gasolina</div>
+        <div class="concepto-desc" id="descGas">Calcula la ruta primero</div>
       </div>
       <div class="concepto-monto" id="montoGas">$—</div>
     </div>
-
     <div class="concepto">
       <div class="concepto-info">
         <div class="concepto-label">🛣️ Casetas</div>
-        <div class="concepto-desc">Ida y vuelta</div>
+        <div class="concepto-desc" id="descCasetas">— casetas × $— × 2</div>
       </div>
       <div class="concepto-monto" id="montoCasetas">$0</div>
     </div>
-
     <div class="concepto">
       <div class="concepto-info">
         <div class="concepto-label">🍽️ Alimentación</div>
-        <div class="concepto-desc" id="descAlim">— personas × — días</div>
+        <div class="concepto-desc" id="descAlim">—</div>
       </div>
       <div class="concepto-monto" id="montoAlim">$—</div>
     </div>
-
     <div class="concepto">
       <div class="concepto-info">
         <div class="concepto-label">🏨 Hospedaje</div>
-        <div class="concepto-desc" id="descHosp">— personas × — noches</div>
+        <div class="concepto-desc" id="descHosp">—</div>
       </div>
       <div class="concepto-monto" id="montoHosp">$—</div>
     </div>
-
     <div class="concepto">
       <div class="concepto-info">
         <div class="concepto-label">🚗 Estacionamiento</div>
-        <div class="concepto-desc" id="descEst">— días</div>
+        <div class="concepto-desc" id="descEst">—</div>
       </div>
       <div class="concepto-monto" id="montoEst">$—</div>
     </div>
-
     <div class="concepto">
       <div class="concepto-info">
         <div class="concepto-label">📋 Imprevistos</div>
-        <div class="concepto-desc" id="descImp">— días</div>
+        <div class="concepto-desc" id="descImp">—</div>
       </div>
       <div class="concepto-monto" id="montoImp">$—</div>
     </div>
   </div>
 
-  <!-- ⑥ TOTAL -->
+  <!-- ⑨ TOTAL -->
   <div class="total-box">
     <div class="total-label">Total general del viaje</div>
     <div class="total-monto" id="totalGeneral">$—</div>
-    <div class="total-sub" id="totalPorPersona">— por persona</div>
+    <div class="total-sub" id="totalPorPersona"></div>
   </div>
 
-  <!-- ⑦ GUARDAR -->
+  <!-- ⑩ CORREO Y ACCIONES -->
   <div class="card">
-    <div class="card-title">💾 Guardar registro</div>
-    <label>Nombre del solicitante</label>
-    <input type="text" id="solicitante" placeholder="Nombre completo">
-    <label>Proyecto / motivo del viaje</label>
-    <input type="text" id="proyecto" placeholder="Ej: Visita a cliente, capacitación...">
-    <button class="btn-guardar" id="btnGuardar" onclick="guardarEnSheets()" style="margin-top:14px">
-      ✅ Guardar en Google Sheets
-    </button>
+    <div class="card-title">📧 Envío y registro</div>
+    <label>Correo destino (a quien se envía)</label>
+    <input type="email" id="correoDestino" placeholder="ejemplo@correo.com">
+    <p style="font-size:11px;color:var(--muted);margin-top:4px">
+      Se enviará desde mariel-robles@mdreieck.com.mx vía el sistema
+    </p>
+
+    <div style="margin-top:16px">
+      <button class="btn-pdf" onclick="generarPDF()">📄 Generar PDF</button>
+      <button class="btn-email" id="btnEmail" onclick="enviarCorreo()">📧 Generar PDF y enviar por correo</button>
+      <button class="btn-guardar" id="btnGuardar" onclick="guardarEnSheets()">✅ Guardar en Google Sheets</button>
+    </div>
   </div>
 
 </main>
 
-<!-- Nav inferior igual al de tu app -->
 <div class="nav-bottom">
   <a href="index.html">← Inicio</a>
   <a href="viaticos.html" style="color:var(--accent)">🗺️ Viáticos</a>
@@ -448,27 +463,25 @@
 <div id="toast"></div>
 
 <script>
-  // ─── CONFIG ────────────────────────────────────────────────
-  const ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjM4OWUyMjcwN2U5ZTQwNTlhOTFlMjUzMDk0YjhhM2VlIiwiaCI6Im11cm11cjY0In0=';
-
-  // Google Sheets Web App URL — reemplaza con tu URL de Apps Script
+  const ORS_KEY    = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjM4OWUyMjcwN2U5ZTQwNTlhOTFlMjUzMDk0YjhhM2VlIiwiaCI6Im11cm11cjY0In0=';
   const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzu8pg2PNDNeTO2cdAUgBo3bQSNw-QUUF1-B3C4JlPuyGpQ-ml5aPlEWszzwWum_9mPSQ/exec';
+  const REMITENTE  = 'mariel-robles@mdreieck.com.mx';
 
-  // ─── ESTADO ────────────────────────────────────────────────
-  let kmCalculados   = 0;
-  let costoGasCalc   = 0;
+  let kmCalculados = 0;
+  let costoGasCalc = 0;
+  let kmIda        = 0;
 
-  // ─── GEOCODE (dirección → coordenadas) ─────────────────────
+  // ── GEOCODE ──────────────────────────────────────────────
   async function geocode(lugar) {
     const url = `https://api.openrouteservice.org/geocode/search?api_key=${ORS_KEY}&text=${encodeURIComponent(lugar)}&boundary.country=MX&size=1`;
     const r = await fetch(url);
     if (!r.ok) throw new Error('Geocode error');
     const d = await r.json();
     if (!d.features || d.features.length === 0) throw new Error('Lugar no encontrado: ' + lugar);
-    return d.features[0].geometry.coordinates; // [lng, lat]
+    return d.features[0].geometry.coordinates;
   }
 
-  // ─── CALCULAR RUTA ─────────────────────────────────────────
+  // ── CALCULAR RUTA ────────────────────────────────────────
   async function calcularRuta() {
     const origen  = document.getElementById('origen').value.trim();
     const destino = document.getElementById('destino').value.trim();
@@ -480,84 +493,76 @@
       return;
     }
 
-    // UI loading
     errEl.style.display = 'none';
-    document.getElementById('btnRuta').disabled    = true;
+    document.getElementById('btnRuta').disabled = true;
     document.getElementById('spinnerRuta').classList.add('show');
     document.getElementById('btnRutaText').textContent = 'Calculando…';
     document.getElementById('rutaResult').classList.remove('show');
+    document.getElementById('btnMaps').classList.remove('show');
 
     try {
-      // 1. Geocodificar
       const [cOrigen, cDestino] = await Promise.all([geocode(origen), geocode(destino)]);
 
-      // 2. Ruta driving-car
-      const body = {
-        coordinates: [cOrigen, cDestino],
-        units: 'km',
-        language: 'es'
-      };
+      const body = { coordinates: [cOrigen, cDestino], units: 'km', language: 'es' };
       const r = await fetch('https://api.openrouteservice.org/v2/directions/driving-car/json', {
         method: 'POST',
-        headers: {
-          'Authorization': ORS_KEY,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Authorization': ORS_KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
+      if (!r.ok) throw new Error('Error de ruta');
 
-      if (!r.ok) {
-        const err = await r.json();
-        throw new Error(err.error?.message || 'Error de ruta');
-      }
+      const data    = await r.json();
+      const summary = data.routes[0].summary;
+      const km      = Math.round(summary.distance);
+      const segs    = Math.round(summary.duration);
+      const horas   = Math.floor(segs / 3600);
+      const mins    = Math.floor((segs % 3600) / 60);
 
-      const data     = await r.json();
-      const summary  = data.routes[0].summary;
-      const km       = Math.round(summary.distance);         // ida
-      const segs     = Math.round(summary.duration);         // segundos
-      const horas    = Math.floor(segs / 3600);
-      const mins     = Math.floor((segs % 3600) / 60);
-
-      // Guardar km para recalcular
-      kmCalculados = km * 2; // ida y vuelta
+      kmIda        = km;
+      kmCalculados = km * 2;
 
       const rendimiento = parseFloat(document.getElementById('rendimiento').value) || 12;
       const precioGas   = parseFloat(document.getElementById('precioGas').value)   || 24.5;
       const litros      = kmCalculados / rendimiento;
       costoGasCalc      = litros * precioGas;
 
-      // Mostrar resultado de ruta
-      document.getElementById('resKm').textContent       = `${km} km (ida)`;
-      document.getElementById('resTiempo').textContent   = `${horas}h ${mins}min (ida)`;
-      document.getElementById('resLitros').textContent   = `${litros.toFixed(1)} L`;
+      document.getElementById('resKm').textContent      = `${km} km`;
+      document.getElementById('resTiempo').textContent  = `${horas}h ${mins}min`;
+      document.getElementById('resLitros').textContent  = `${litros.toFixed(1)} L`;
       document.getElementById('resCostoGas').textContent = fmt(costoGasCalc);
       document.getElementById('rutaResult').classList.add('show');
+
+      // Generar link Google Maps con ruta precargada
+      const mapsUrl = `https://www.google.com/maps/dir/${encodeURIComponent(origen)}/${encodeURIComponent(destino)}`;
+      const btnMaps = document.getElementById('btnMaps');
+      btnMaps.href  = mapsUrl;
+      btnMaps.classList.add('show');
 
       recalcular();
 
     } catch(e) {
       errEl.style.display = 'block';
-      errEl.textContent   = '⚠️ ' + (e.message || 'Error al calcular la ruta. Intenta con nombre de ciudad.');
+      errEl.textContent   = '⚠️ ' + (e.message || 'Error al calcular. Intenta con nombre de ciudad.');
     } finally {
-      document.getElementById('btnRuta').disabled    = false;
+      document.getElementById('btnRuta').disabled = false;
       document.getElementById('spinnerRuta').classList.remove('show');
       document.getElementById('btnRutaText').textContent = '📍 Calcular ruta';
     }
   }
 
-  // ─── RECALCULAR TOTALES ────────────────────────────────────
+  // ── RECALCULAR ───────────────────────────────────────────
   function recalcular() {
-    const personas      = parseInt(document.getElementById('personas').value)       || 1;
-    const dias          = parseInt(document.getElementById('dias').value)            || 1;
-    const desayuno      = parseFloat(document.getElementById('desayuno').value)      || 0;
-    const comida        = parseFloat(document.getElementById('comida').value)        || 0;
-    const cena          = parseFloat(document.getElementById('cena').value)          || 0;
-    const hospedaje     = parseFloat(document.getElementById('hospedaje').value)     || 0;
-    const estacion      = parseFloat(document.getElementById('estacionamiento').value) || 0;
-    const imprevistos   = parseFloat(document.getElementById('imprevistos').value)   || 0;
-    const casetas       = parseFloat(document.getElementById('casetas').value)       || 0;
+    const personas    = parseInt(document.getElementById('personas').value)    || 1;
+    const dias        = parseInt(document.getElementById('dias').value)         || 1;
+    const desayuno    = parseFloat(document.getElementById('desayuno').value)   || 0;
+    const comida      = parseFloat(document.getElementById('comida').value)     || 0;
+    const cena        = parseFloat(document.getElementById('cena').value)       || 0;
+    const hospedaje   = parseFloat(document.getElementById('hospedaje').value)  || 0;
+    const estacion    = parseFloat(document.getElementById('estacionamiento').value) || 0;
+    const imprevistos = parseFloat(document.getElementById('imprevistos').value) || 0;
+    const numCasetas  = parseInt(document.getElementById('numCasetas').value)   || 0;
+    const precioCas   = parseFloat(document.getElementById('precioCaseta').value) || 0;
 
-    // Recalcular gasolina si ya tenemos km
     if (kmCalculados > 0) {
       const rendimiento = parseFloat(document.getElementById('rendimiento').value) || 12;
       const precioGas   = parseFloat(document.getElementById('precioGas').value)   || 24.5;
@@ -566,122 +571,362 @@
       document.getElementById('resLitros').textContent   = `${(kmCalculados / rendimiento).toFixed(1)} L`;
     }
 
-    const alim   = (desayuno + comida + cena) * personas * dias;
-    const hosp   = hospedaje * personas * (dias > 0 ? dias - 1 : 0); // noches = días - 1, mínimo 0
-    const est    = estacion * dias;
-    const imp    = imprevistos * dias;
-    const gas    = costoGasCalc;
-
-    const total  = gas + casetas + alim + hosp + est + imp;
+    const totalCasetas = numCasetas * precioCas * 2;
+    const alim         = (desayuno + comida + cena) * personas * dias;
+    const noches       = Math.max(dias - 1, 0);
+    const hosp         = hospedaje * personas * noches;
+    const est          = estacion * dias;
+    const imp          = imprevistos * dias;
+    const gas          = costoGasCalc;
+    const total        = gas + totalCasetas + alim + hosp + est + imp;
 
     // Desglose
-    document.getElementById('descGas').textContent   = kmCalculados > 0 ? `${kmCalculados} km ida y vuelta` : 'Calcula la ruta primero';
-    document.getElementById('montoGas').textContent  = gas > 0 ? fmt(gas) : '$—';
+    document.getElementById('descGas').textContent     = kmCalculados > 0 ? `${kmCalculados} km ida y vuelta` : 'Calcula la ruta primero';
+    document.getElementById('montoGas').textContent    = gas > 0 ? fmt(gas) : '$—';
+    document.getElementById('descCasetas').textContent = `${numCasetas} casetas × ${fmt(precioCas)} × 2 viajes`;
+    document.getElementById('montoCasetas').textContent = fmt(totalCasetas);
+    document.getElementById('descAlim').textContent    = `${personas} persona(s) × ${dias} día(s)`;
+    document.getElementById('montoAlim').textContent   = fmt(alim);
+    document.getElementById('descHosp').textContent    = `${personas} persona(s) × ${noches} noche(s)`;
+    document.getElementById('montoHosp').textContent   = fmt(hosp);
+    document.getElementById('descEst').textContent     = `${dias} día(s)`;
+    document.getElementById('montoEst').textContent    = fmt(est);
+    document.getElementById('descImp').textContent     = `${dias} día(s)`;
+    document.getElementById('montoImp').textContent    = fmt(imp);
 
-    document.getElementById('montoCasetas').textContent = fmt(casetas);
-
-    document.getElementById('descAlim').textContent  = `${personas} persona(s) × ${dias} día(s)`;
-    document.getElementById('montoAlim').textContent  = fmt(alim);
-
-    const noches = Math.max(dias - 1, 0);
-    document.getElementById('descHosp').textContent  = `${personas} persona(s) × ${noches} noche(s)`;
-    document.getElementById('montoHosp').textContent  = fmt(hosp);
-
-    document.getElementById('descEst').textContent   = `${dias} día(s)`;
-    document.getElementById('montoEst').textContent   = fmt(est);
-
-    document.getElementById('descImp').textContent   = `${dias} día(s)`;
-    document.getElementById('montoImp').textContent   = fmt(imp);
-
-    // Total
-    document.getElementById('totalGeneral').textContent   = gas > 0 ? fmt(total) : '— (calcula la ruta)';
-    document.getElementById('totalPorPersona').textContent = gas > 0 && personas > 0
-      ? `${fmt(total / personas)} por persona`
-      : '';
+    document.getElementById('totalGeneral').textContent   = total > 0 ? fmt(total) : '$—';
+    document.getElementById('totalPorPersona').textContent = total > 0 && personas > 0 ? `${fmt(total / personas)} por persona` : '';
   }
 
-  // ─── GUARDAR EN SHEETS ─────────────────────────────────────
-  async function guardarEnSheets() {
-    if (SHEETS_URL === 'TU_APPS_SCRIPT_URL_AQUI') {
-      toast('⚙️ Configura el URL de Google Sheets primero', 'err'); return;
+  // ── DATOS RECOPILADOS ────────────────────────────────────
+  function getDatos() {
+    const personas    = parseInt(document.getElementById('personas').value)    || 1;
+    const dias        = parseInt(document.getElementById('dias').value)         || 1;
+    const desayuno    = parseFloat(document.getElementById('desayuno').value)   || 0;
+    const comida      = parseFloat(document.getElementById('comida').value)     || 0;
+    const cena        = parseFloat(document.getElementById('cena').value)       || 0;
+    const hospedaje   = parseFloat(document.getElementById('hospedaje').value)  || 0;
+    const estacion    = parseFloat(document.getElementById('estacionamiento').value) || 0;
+    const imprevistos = parseFloat(document.getElementById('imprevistos').value) || 0;
+    const numCasetas  = parseInt(document.getElementById('numCasetas').value)   || 0;
+    const precioCas   = parseFloat(document.getElementById('precioCaseta').value) || 0;
+    const noches      = Math.max(dias - 1, 0);
+    const totalCasetas = numCasetas * precioCas * 2;
+    const alim        = (desayuno + comida + cena) * personas * dias;
+    const hosp        = hospedaje * personas * noches;
+    const est         = estacion * dias;
+    const imp         = imprevistos * dias;
+    const total       = costoGasCalc + totalCasetas + alim + hosp + est + imp;
+
+    return {
+      area:           document.getElementById('area').value,
+      solicitante:    document.getElementById('solicitante').value,
+      trabajador:     document.getElementById('trabajador').value,
+      fechaInicio:    document.getElementById('fechaInicio').value,
+      fechaFin:       document.getElementById('fechaFin').value,
+      tipoServicio:   document.getElementById('tipoServicio').value,
+      cliente:        document.getElementById('cliente').value,
+      observaciones:  document.getElementById('observaciones').value,
+      banco:          document.getElementById('banco').value,
+      sucursal:       document.getElementById('sucursal').value,
+      tarjeta:        document.getElementById('tarjeta').value,
+      clabe:          document.getElementById('clabe').value,
+      origen:         document.getElementById('origen').value,
+      destino:        document.getElementById('destino').value,
+      km:             kmCalculados,
+      personas, dias, noches,
+      numCasetas, precioCas,
+      gasolina:       costoGasCalc,
+      casetas:        totalCasetas,
+      alimentacion:   alim,
+      hospedaje:      hosp,
+      estacionamiento: est,
+      imprevistos:    imp,
+      total,
+      fecha: new Date().toLocaleDateString('es-MX')
+    };
+  }
+
+  // ── GENERAR PDF ──────────────────────────────────────────
+  function generarPDF() {
+    if (kmCalculados === 0) { toast('Calcula la ruta primero', 'err'); return; }
+    const d = getDatos();
+    if (!d.solicitante) { toast('Escribe el nombre del solicitante', 'err'); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'letter' });
+
+    const azul   = [26, 16, 128];
+    const azulC  = [173, 216, 230];
+    const blanco = [255, 255, 255];
+    const negro  = [0, 0, 0];
+    const amarillo = [255, 255, 0];
+    const gris   = [240, 240, 240];
+
+    const W = 215.9, M = 10;
+    let y = 10;
+
+    // Logo MD (rectángulo azul)
+    doc.setFillColor(...azul);
+    doc.rect(M, y, 35, 20, 'F');
+    doc.setTextColor(...blanco);
+    doc.setFontSize(16); doc.setFont('helvetica','bold');
+    doc.text('MD', M + 17.5, y + 13, { align: 'center' });
+
+    // Título
+    doc.setTextColor(...negro);
+    doc.setFontSize(14); doc.setFont('helvetica','bold');
+    doc.text('Formato-Solicitud para pago de viáticos', W/2 + 10, y + 8, { align: 'center' });
+
+    // Folio
+    doc.setFillColor(...amarillo);
+    doc.rect(155, y, 50, 8, 'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.setTextColor(...negro);
+    doc.text('FOLIO:', 157, y + 5.5);
+    doc.setFont('helvetica','normal');
+    doc.text(d.fecha.replace(/\//g,'-'), 175, y + 5.5);
+
+    y += 26;
+
+    // ── helper para filas ──
+    function fila(label, valor, x, w, fy, h=8, labelW=45) {
+      doc.setFillColor(...azulC);
+      doc.rect(x, fy, labelW, h, 'F');
+      doc.setDrawColor(180,180,200);
+      doc.rect(x, fy, w, h);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...negro);
+      doc.text(label, x + 2, fy + 5.5);
+      doc.setFont('helvetica','normal');
+      const txt = String(valor || '—');
+      doc.text(txt.substring(0,50), x + labelW + 2, fy + 5.5);
     }
 
-    const solicitante = document.getElementById('solicitante').value.trim();
-    const proyecto    = document.getElementById('proyecto').value.trim();
-    if (!solicitante) { toast('Escribe el nombre del solicitante', 'err'); return; }
-    if (kmCalculados === 0) { toast('Calcula la ruta antes de guardar', 'err'); return; }
+    function filaFull(label, valor, fy, h=8, labelW=55) {
+      const w = W - M*2;
+      fila(label, valor, M, w, fy, h, labelW);
+    }
 
-    const personas    = parseInt(document.getElementById('personas').value)  || 1;
-    const dias        = parseInt(document.getElementById('dias').value)       || 1;
-    const casetas     = parseFloat(document.getElementById('casetas').value)  || 0;
-    const alim        = (
-      (parseFloat(document.getElementById('desayuno').value) || 0) +
-      (parseFloat(document.getElementById('comida').value)   || 0) +
-      (parseFloat(document.getElementById('cena').value)     || 0)
-    ) * personas * dias;
-    const noches  = Math.max(dias - 1, 0);
-    const hosp    = (parseFloat(document.getElementById('hospedaje').value) || 0) * personas * noches;
-    const est     = (parseFloat(document.getElementById('estacionamiento').value) || 0) * dias;
-    const imp     = (parseFloat(document.getElementById('imprevistos').value) || 0) * dias;
-    const total   = costoGasCalc + casetas + alim + hosp + est + imp;
+    // Área solicitante
+    filaFull('Área Solicitante:', d.area, y);
+    y += 9;
+
+    // Nombre quien solicita + Banco (2 columnas)
+    const mid = (W - M*2) / 2;
+    fila('Nombre de quien solicita:', d.solicitante, M, mid - 2, y, 8, 52);
+    fila('Banco:', d.banco, M + mid, mid - 2, y, 8, 20);
+    y += 9;
+
+    // Trabajador + Tarjeta
+    fila('Nombre completo del trabajador:', d.trabajador, M, mid - 2, y, 10, 52);
+    fila('No. Tarjeta:', d.tarjeta, M + mid, mid - 2, y, 10, 20);
+    y += 11;
+
+    // Fechas + CLABE
+    fila('Fecha inicio:', d.fechaInicio, M, mid - 2, y, 8, 30);
+    fila('CLABE:', d.clabe, M + mid, mid - 2, y, 8, 20);
+    y += 9;
+    fila('Fecha fin:', d.fechaFin, M, mid - 2, y, 8, 30);
+    fila('Sucursal:', d.sucursal, M + mid, mid - 2, y, 8, 20);
+    y += 9;
+    fila('Total de días:', d.dias, M, mid - 2, y, 8, 30);
+    y += 9;
+
+    // Tipo de servicio
+    filaFull('Tipo de servicio:', d.tipoServicio, y, 10, 40);
+    y += 11;
+
+    // Cliente
+    filaFull('Nombre del cliente:', d.cliente, y);
+    y += 9;
+
+    // Ruta
+    filaFull('Ruta:', `${d.origen} → ${d.destino} (${d.km} km ida y vuelta)`, y);
+    y += 9;
+
+    // Observaciones
+    filaFull('Observaciones:', d.observaciones, y, 14, 35);
+    y += 16;
+
+    // ── TABLA DE COSTOS ──
+    doc.setFillColor(...azul);
+    doc.rect(M, y, W - M*2, 8, 'F');
+    doc.setTextColor(...blanco);
+    doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    doc.text('DESGLOSE DE VIÁTICOS', W/2, y + 5.5, { align: 'center' });
+    y += 9;
+
+    const conceptos = [
+      ['⛽ Gasolina', `${d.km} km × $${(parseFloat(document.getElementById('precioGas').value)||24.5).toFixed(2)}/L ÷ ${document.getElementById('rendimiento').value} km/L`, d.gasolina],
+      ['🛣️ Casetas',  `${d.numCasetas} casetas × $${d.precioCas} × 2 viajes`, d.casetas],
+      ['🍽️ Alimentación', `${d.personas} persona(s) × ${d.dias} día(s)`, d.alimentacion],
+      ['🏨 Hospedaje', `${d.personas} persona(s) × ${d.noches} noche(s)`, d.hospedaje],
+      ['🚗 Estacionamiento', `${d.dias} día(s)`, d.estacionamiento],
+      ['📋 Imprevistos', `${d.dias} día(s)`, d.imprevistos],
+    ];
+
+    conceptos.forEach(([label, desc, monto], i) => {
+      const bg = i % 2 === 0 ? blanco : gris;
+      doc.setFillColor(...bg);
+      doc.rect(M, y, W - M*2, 8, 'F');
+      doc.setDrawColor(200,200,210);
+      doc.rect(M, y, W - M*2, 8);
+      doc.setTextColor(...negro);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8);
+      doc.text(label.replace(/[^\x00-\x7F]/g, ''), M + 3, y + 5.5);
+      doc.setFont('helvetica','normal');
+      doc.text(desc, M + 55, y + 5.5);
+      doc.setFont('helvetica','bold');
+      doc.text(fmt(monto), W - M - 3, y + 5.5, { align: 'right' });
+      y += 9;
+    });
+
+    // Total general
+    doc.setFillColor(...azul);
+    doc.rect(M, y, W - M*2, 10, 'F');
+    doc.setTextColor(...blanco);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('TOTAL GENERAL', M + 5, y + 6.5);
+    doc.text(fmt(d.total), W - M - 3, y + 6.5, { align: 'right' });
+    y += 12;
+
+    // Total por persona
+    doc.setTextColor(...negro);
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text(`Total por persona: ${fmt(d.total / d.personas)}`, W - M - 3, y + 5, { align: 'right' });
+    y += 12;
+
+    // Firmas
+    doc.setDrawColor(...negro);
+    doc.line(M, y + 10, M + 50, y + 10);
+    doc.line(M + 80, y + 10, M + 130, y + 10);
+    doc.line(M + 160, y + 10, W - M, y + 10);
+    doc.setFontSize(8);
+    doc.text('Solicitante', M + 25, y + 14, { align: 'center' });
+    doc.text('Autoriza', M + 105, y + 14, { align: 'center' });
+    doc.text('Vo.Bo. Finanzas', M + 178, y + 14, { align: 'center' });
+
+    // Footer
+    y += 20;
+    doc.setFontSize(7); doc.setTextColor(150, 150, 150);
+    doc.text(`Generado por sistema M Dreieck · ${new Date().toLocaleString('es-MX')}`, W/2, y, { align: 'center' });
+
+    const nombre = `Viaticos_${(d.trabajador || 'MD').replace(/\s/g,'_')}_${d.fechaInicio || d.fecha}.pdf`;
+    doc.save(nombre);
+    toast('✅ PDF generado', 'ok');
+    return doc;
+  }
+
+  // ── ENVIAR POR CORREO (via Apps Script) ─────────────────
+  async function enviarCorreo() {
+    if (kmCalculados === 0) { toast('Calcula la ruta primero', 'err'); return; }
+    const d = getDatos();
+    if (!d.solicitante) { toast('Escribe el nombre del solicitante', 'err'); return; }
+    const correo = document.getElementById('correoDestino').value.trim();
+    if (!correo) { toast('Escribe el correo destino', 'err'); return; }
+
+    // Generar PDF primero (descarga local)
+    generarPDF();
+
+    // Enviar notificación con resumen por correo via Sheets script
+    const btn = document.getElementById('btnEmail');
+    btn.disabled = true; btn.textContent = 'Enviando…';
 
     const payload = {
-      fecha:        new Date().toLocaleDateString('es-MX'),
-      solicitante,
-      proyecto,
-      origen:       document.getElementById('origen').value,
-      destino:      document.getElementById('destino').value,
-      km:           kmCalculados,
-      personas,
-      dias,
-      gasolina:     costoGasCalc.toFixed(2),
-      casetas:      casetas.toFixed(2),
-      alimentacion: alim.toFixed(2),
-      hospedaje:    hosp.toFixed(2),
-      estacionamiento: est.toFixed(2),
-      imprevistos:  imp.toFixed(2),
-      total:        total.toFixed(2)
+      accion:         'email',
+      correoDestino:  correo,
+      remitente:      REMITENTE,
+      solicitante:    d.solicitante,
+      trabajador:     d.trabajador,
+      area:           d.area,
+      cliente:        d.cliente,
+      tipoServicio:   d.tipoServicio,
+      origen:         d.origen,
+      destino:        d.destino,
+      km:             d.km,
+      dias:           d.dias,
+      personas:       d.personas,
+      fechaInicio:    d.fechaInicio,
+      fechaFin:       d.fechaFin,
+      gasolina:       d.gasolina.toFixed(2),
+      casetas:        d.casetas.toFixed(2),
+      alimentacion:   d.alimentacion.toFixed(2),
+      hospedaje:      d.hospedaje.toFixed(2),
+      estacionamiento: d.estacionamiento.toFixed(2),
+      imprevistos:    d.imprevistos.toFixed(2),
+      total:          d.total.toFixed(2),
+      fecha:          d.fecha
     };
-
-    const btn = document.getElementById('btnGuardar');
-    btn.disabled = true;
-    btn.textContent = 'Guardando…';
 
     try {
       await fetch(SHEETS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
+        method: 'POST', mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      toast('✅ Viáticos guardados correctamente', 'ok');
-      btn.textContent = '✅ Guardado';
+      toast('✅ PDF descargado · correo enviado', 'ok');
     } catch(e) {
-      toast('❌ Error al guardar. Intenta de nuevo.', 'err');
-      btn.disabled = false;
-      btn.textContent = '✅ Guardar en Google Sheets';
+      toast('⚠️ PDF listo, fallo el correo', 'err');
+    } finally {
+      btn.disabled = false; btn.textContent = '📧 Generar PDF y enviar por correo';
     }
   }
 
-  // ─── HELPERS ───────────────────────────────────────────────
+  // ── GUARDAR EN SHEETS ────────────────────────────────────
+  async function guardarEnSheets() {
+    if (kmCalculados === 0) { toast('Calcula la ruta primero', 'err'); return; }
+    const d = getDatos();
+    if (!d.solicitante) { toast('Escribe el nombre del solicitante', 'err'); return; }
+
+    const btn = document.getElementById('btnGuardar');
+    btn.disabled = true; btn.textContent = 'Guardando…';
+
+    const payload = {
+      accion: 'sheets',
+      fecha: d.fecha, solicitante: d.solicitante, trabajador: d.trabajador,
+      area: d.area, tipoServicio: d.tipoServicio, cliente: d.cliente,
+      origen: d.origen, destino: d.destino, km: d.km,
+      personas: d.personas, dias: d.dias,
+      gasolina: d.gasolina.toFixed(2), casetas: d.casetas.toFixed(2),
+      alimentacion: d.alimentacion.toFixed(2), hospedaje: d.hospedaje.toFixed(2),
+      estacionamiento: d.estacionamiento.toFixed(2), imprevistos: d.imprevistos.toFixed(2),
+      total: d.total.toFixed(2)
+    };
+
+    try {
+      await fetch(SHEETS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      toast('✅ Guardado en Google Sheets', 'ok');
+      btn.textContent = '✅ Guardado';
+    } catch(e) {
+      toast('❌ Error al guardar', 'err');
+      btn.disabled = false; btn.textContent = '✅ Guardar en Google Sheets';
+    }
+  }
+
+  // ── HELPERS ──────────────────────────────────────────────
   function fmt(n) {
     return '$' + Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
-
   function toast(msg, type = 'ok') {
     const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.className   = `show ${type}`;
+    el.textContent = msg; el.className = `show ${type}`;
     setTimeout(() => { el.className = ''; }, 3500);
   }
 
-  // ─── INIT ──────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', recalcular);
-
-  // Recalcular cuando cambia gasolina/rendimiento
-  document.getElementById('rendimiento').addEventListener('input', recalcular);
-  document.getElementById('precioGas').addEventListener('input', recalcular);
-  document.getElementById('casetas').addEventListener('input', recalcular);
+  // Init
+  document.addEventListener('DOMContentLoaded', () => {
+    recalcular();
+    document.getElementById('rendimiento').addEventListener('input', recalcular);
+    document.getElementById('precioGas').addEventListener('input', recalcular);
+    // Fecha de hoy por default
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('fechaInicio').value = hoy;
+    document.getElementById('fechaFin').value = hoy;
+  });
 </script>
 </body>
 </html>
