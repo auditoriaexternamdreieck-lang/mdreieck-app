@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+  <title>Registro de Proveedores · MDreieck</title>
+  <style>
+    :root {
+      --azul:    #1a1080;
+      --azul2:   #2e75b6;
+      --azulC:   #deeaf1;
+      --text:    #1a1a2e;
+      --muted:   #5a6a7e;
+      --border:  #c8d8e8;
+      --bg:      #f4f7fb;
+      --white:   #ffffff;
+      --success: #1e8c4e;
+      --danger:  #c0392b;
+      --accent:  #e8a838;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--azul);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(26,16,128,.18);
+    }
+    .logo-wrap { display: flex; align-items: center; gap: 12px; }
+    .logo-img {
+      width: 44px; height: 44px;
+      background: white;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 15px; color: var(--azul);
+      letter-spacing: -1px; flex-shrink: 0;
+    }
+    .logo-text { color: white; }
+    .logo-text strong { font-size: 16px; display: block; }
+    .logo-text span { font-size: 11px; opacity: .7; }
+    .header-badge {
+      background: var(--accent);
+      color: var(--azul);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--azul) 0%, var(--azul2) 100%);
+      color: white;
+      padding: 36px 24px 32px;
+      text-align: center;
+    }
+    .hero h1 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .hero p  { font-size: 13px; opacity: .8; max-width: 480px; margin: 0 auto; line-height: 1.6; }
+    .hero-tags {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      justify-content: center; margin-top: 16px;
+    }
+    .hero-tag {
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      color: white;
+      font-size: 11px; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px;
+    }
+
+    /* PROGRESS */
+    .progress-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex; gap: 6px; align-items: center;
+      overflow-x: auto;
+    }
+    .step {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .step.active { color: var(--azul); }
+    .step.done   { color: var(--success); }
+    .step-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--muted);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 800; flex-shrink: 0;
+    }
+    .step.active .step-num { background: var(--azul); color: white; }
+    .step.done   .step-num { background: var(--success); color: white; }
+    .step-sep { color: var(--border); font-size: 14px; flex-shrink: 0; }
+
+    /* MAIN */
+    main { max-width: 600px; margin: 0 auto; padding: 20px 16px; }
+
+    /* SECTIONS */
+    .section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .section.active { display: block; }
+    .section-title {
+      font-size: 13px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--azul); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--azulC);
+    }
+
+    /* FORM */
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--muted); margin-bottom: 5px;
+    }
+    .field label span.req { color: var(--danger); }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px; color: var(--text);
+      background: var(--white);
+      outline: none;
+      transition: border-color .15s;
+      font-family: inherit;
+      -webkit-appearance: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--azul2);
+      box-shadow: 0 0 0 3px rgba(46,117,182,.1);
+    }
+    .field textarea { resize: vertical; min-height: 70px; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* TIPO PERSONA TOGGLE */
+    .tipo-toggle {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .tipo-btn {
+      border: 2px solid var(--border);
+      border-radius: 10px; padding: 14px 10px;
+      text-align: center; cursor: pointer;
+      transition: all .15s; background: var(--white);
+    }
+    .tipo-btn.selected {
+      border-color: var(--azul);
+      background: var(--azulC);
+    }
+    .tipo-btn .tipo-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+    .tipo-btn .tipo-label { font-size: 13px; font-weight: 700; color: var(--text); }
+    .tipo-btn .tipo-desc  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* DOC UPLOAD */
+    .doc-item {
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px;
+      margin-bottom: 10px;
+      transition: border-color .15s;
+    }
+    .doc-item.uploaded { border-color: var(--success); background: #f0faf4; }
+    .doc-header {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 10px;
+    }
+    .doc-info { flex: 1; }
+    .doc-name { font-size: 13px; font-weight: 700; color: var(--text); }
+    .doc-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .doc-req  { font-size: 10px; font-weight: 700; color: var(--danger); margin-top: 2px; }
+    .doc-opt  { font-size: 10px; font-weight: 700; color: var(--muted); margin-top: 2px; }
+    .doc-status {
+      font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 20px;
+      background: var(--border); color: var(--muted);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .doc-item.uploaded .doc-status {
+      background: #d4edda; color: var(--success);
+    }
+    .doc-upload-btn {
+      display: block; width: 100%;
+      margin-top: 10px; padding: 9px;
+      border: 1.5px dashed var(--azul2);
+      border-radius: 8px; background: transparent;
+      color: var(--azul2); font-size: 13px; font-weight: 600;
+      cursor: pointer; text-align: center;
+      transition: all .15s;
+    }
+    .doc-upload-btn:hover { background: var(--azulC); }
+    .doc-file-name {
+      font-size: 11px; color: var(--success);
+      margin-top: 6px; display: none;
+      word-break: break-all;
+    }
+
+    /* NOTE */
+    .note {
+      font-size: 11px; color: var(--muted);
+      background: var(--azulC);
+      border-left: 3px solid var(--azul2);
+      border-radius: 4px; padding: 8px 12px;
+      margin-bottom: 14px; line-height: 1.5;
+    }
+    .note.warn {
+      background: #fff8e1; border-left-color: var(--accent); color: #7a5c00;
+    }
+
+    /* BUTTONS */
+    .btn-next {
+      width: 100%; padding: 15px;
+      background: var(--azul); color: white;
+      border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; margin-top: 8px;
+      transition: opacity .15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-next:hover { opacity: .9; }
+    .btn-back {
+      width: 100%; padding: 13px;
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 12px;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; margin-top: 8px;
+    }
+    .btn-send {
+      width: 100%; padding: 16px;
+      background: var(--success); color: white;
+      border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 800;
+      cursor: pointer; margin-top: 8px;
+      transition: opacity .15s;
+    }
+    .btn-send:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* DECLARACION */
+    .check-wrap {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 14px; background: var(--azulC);
+      border-radius: 10px; margin-bottom: 14px; cursor: pointer;
+    }
+    .check-wrap input[type=checkbox] {
+      width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;
+      accent-color: var(--azul);
+    }
+    .check-wrap span { font-size: 12px; line-height: 1.5; color: var(--text); }
+
+    /* SUCCESS */
+    .success-screen {
+      display: none; text-align: center;
+      padding: 40px 20px;
+      background: var(--white); border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+    .success-screen.show { display: block; }
+    .success-icon { font-size: 56px; margin-bottom: 16px; }
+    .success-screen h2 { font-size: 22px; font-weight: 800; color: var(--azul); margin-bottom: 10px; }
+    .success-screen p  { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* SPINNER */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: white; border-radius: 50%;
+      animation: spin .6s linear infinite; display: none;
+    }
+    .spinner.show { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 20px;
+      font-size: 11px; color: var(--muted);
+    }
+
+    @media (max-width: 480px) {
+      .row2 { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <div class="logo-img">MD</div>
+    <div class="logo-text">
+      <strong>MDreieck</strong>
+      <span>S.A. de C.V.</span>
+    </div>
+  </div>
+  <div class="header-badge">Área Técnica</div>
+</header>
+
+<div class="hero">
+  <h1>Registro de Proveedores</h1>
+  <p>Completa el formulario con tus datos y documentos para integrarte al catálogo de proveedores de MDreieck S.A. de C.V.</p>
+  <div class="hero-tags">
+    <span class="hero-tag">🔒 Datos protegidos</span>
+    <span class="hero-tag">📋 Ley Antilavado</span>
+    <span class="hero-tag">⚡ Proceso digital</span>
+  </div>
+</div>
+
+<div class="progress-bar" id="progressBar">
+  <div class="step active" id="step-ind-1">
+    <div class="step-num">1</div> Tipo de persona
+  </div>
+  <div class="step-sep">›</div>
+  <div class="step" id="step-ind-2">
+    <div class="step-num">2</div> Datos generales
+  </div>
+  <div class="step-sep">›</div>
+  <div class="step" id="step-ind-3">
+    <div class="step-num">3</div> Documentos
+  </div>
+  <div class="step-sep">›</div>
+  <div class="step" id="step-ind-4">
+    <div class="step-num">4</div> Declaración
+  </div>
+</div>
+
+<main>
+
+  <!-- PASO 1: TIPO DE PERSONA -->
+  <div class="section active" id="sec1">
+    <div class="section-title">① Tipo de persona</div>
+    <div class="note">Selecciona si eres una empresa (Persona Moral) o un individuo que presta servicios (Persona Física).</div>
+    <div class="tipo-toggle">
+      <div class="tipo-btn selected" id="btn-moral" onclick="selTipo('moral')">
+        <span class="tipo-icon">🏢</span>
+        <div class="tipo-label">Persona Moral</div>
+        <div class="tipo-desc">Empresa / Sociedad</div>
+      </div>
+      <div class="tipo-btn" id="btn-fisica" onclick="selTipo('fisica')">
+        <span class="tipo-icon">👤</span>
+        <div class="tipo-label">Persona Física</div>
+        <div class="tipo-desc">Individuo / Autónomo</div>
+      </div>
+    </div>
+    <button class="btn-next" onclick="goTo(2)">Continuar →</button>
+  </div>
+
+  <!-- PASO 2: DATOS GENERALES -->
+  <div class="section" id="sec2">
+    <div class="section-title">② Datos generales</div>
+
+    <!-- PERSONA MORAL -->
+    <div id="campos-moral">
+      <div class="field">
+        <label>Razón social <span class="req">*</span></label>
+        <input type="text" id="razonSocial" placeholder="Nombre completo de la empresa">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>RFC <span class="req">*</span></label>
+          <input type="text" id="rfcMoral" placeholder="ABC123456XY0" maxlength="13" style="text-transform:uppercase">
+        </div>
+        <div class="field">
+          <label>Giro / actividad <span class="req">*</span></label>
+          <input type="text" id="giro" placeholder="Ej: Instalación eléctrica">
+        </div>
+      </div>
+      <div class="field">
+        <label>Dirección fiscal <span class="req">*</span></label>
+        <input type="text" id="direccionMoral" placeholder="Calle, número, colonia, ciudad, CP">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Teléfono <span class="req">*</span></label>
+          <input type="tel" id="telMoral" placeholder="10 dígitos">
+        </div>
+        <div class="field">
+          <label>Correo electrónico <span class="req">*</span></label>
+          <input type="email" id="emailMoral" placeholder="contacto@empresa.com">
+        </div>
+      </div>
+      <div class="section-title" style="margin-top:16px">Representante legal</div>
+      <div class="field">
+        <label>Nombre completo <span class="req">*</span></label>
+        <input type="text" id="repNombre" placeholder="Nombre del representante legal">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>RFC del representante <span class="req">*</span></label>
+          <input type="text" id="repRFC" placeholder="ABCD123456XY0" maxlength="13" style="text-transform:uppercase">
+        </div>
+        <div class="field">
+          <label>CURP del representante</label>
+          <input type="text" id="repCURP" placeholder="18 caracteres" maxlength="18" style="text-transform:uppercase">
+        </div>
+      </div>
+      <div class="field">
+        <label>Cargo <span class="req">*</span></label>
+        <input type="text" id="repCargo" placeholder="Ej: Director General, Apoderado Legal">
+      </div>
+    </div>
+
+    <!-- PERSONA FÍSICA -->
+    <div id="campos-fisica" style="display:none">
+      <div class="field">
+        <label>Nombre completo <span class="req">*</span></label>
+        <input type="text" id="nombreFisica" placeholder="Nombre(s) y apellidos">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>RFC <span class="req">*</span></label>
+          <input type="text" id="rfcFisica" placeholder="ABCD123456XY0" maxlength="13" style="text-transform:uppercase">
+        </div>
+        <div class="field">
+          <label>CURP <span class="req">*</span></label>
+          <input type="text" id="curpFisica" placeholder="18 caracteres" maxlength="18" style="text-transform:uppercase">
+        </div>
+      </div>
+      <div class="field">
+        <label>Actividad / servicio que ofrece <span class="req">*</span></label>
+        <input type="text" id="actividadFisica" placeholder="Ej: Técnico en sistemas eléctricos">
+      </div>
+      <div class="field">
+        <label>Dirección <span class="req">*</span></label>
+        <input type="text" id="direccionFisica" placeholder="Calle, número, colonia, ciudad, CP">
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Teléfono <span class="req">*</span></label>
+          <input type="tel" id="telFisica" placeholder="10 dígitos">
+        </div>
+        <div class="field">
+          <label>Correo electrónico <span class="req">*</span></label>
+          <input type="email" id="emailFisica" placeholder="correo@ejemplo.com">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-next" onclick="goTo(3)">Continuar →</button>
+    <button class="btn-back" onclick="goTo(1)">← Regresar</button>
+  </div>
+
+  <!-- PASO 3: DOCUMENTOS -->
+  <div class="section" id="sec3">
+    <div class="section-title">③ Documentos</div>
+    <div class="note warn">⚠️ Los documentos marcados como <b>Obligatorio</b> son requeridos para completar tu registro. Formatos aceptados: PDF, JPG, PNG. Máximo 10 MB por archivo.</div>
+
+    <!-- DOCUMENTOS PERSONA MORAL -->
+    <div id="docs-moral">
+      <div class="doc-item" id="doc-acta">
+        <div class="doc-header">
+          <div class="doc-info">
+            <div class="doc-name">📄 Acta Constitutiva</div>
+            <div class="doc-desc">Documento notarial de constitución de la empresa</div>
+            <div class="doc-req">● Obligatorio</div>
+          </div>
+          <div class="doc-status" id="stat-acta">Pendiente</div>
+        </div>
+        <label class="doc-upload-btn">
+          📎 Seleccionar archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'acta','stat-acta','name-acta')">
+        </label>
+        <div class="doc-file-name" id="name-acta"></div>
+      </div>
+
+      <div class="doc-item" id="doc-csf-moral">
+        <div class="doc-header">
+          <div class="doc-info">
+            <div class="doc-name">🧾 Constancia de Situación Fiscal</div>
+            <div class="doc-desc">Documento actualizado del SAT (no mayor a 3 meses)</div>
+            <div class="doc-req">● Obligatorio</div>
+          </div>
+          <div class="doc-status" id="stat-csf-moral">Pendiente</div>
+        </div>
+        <label class="doc-upload-btn">
+          📎 Seleccionar archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'csf-moral','stat-csf-moral','name-csf-moral')">
+        </label>
+        <div class="doc-file-name" id="name-csf-moral"></div>
+      </div>
+
+      <div class="doc-item" id="doc-ine-moral">
+        <div class="doc-header">
+          <div class="doc-info">
+            <div class="doc-name">🪪 INE del Representante Legal</div>
+            <div class="doc-desc">Identificación oficial vigente (ambos lados)</div>
+            <div class="doc-req">● Obligatorio</div>
+          </div>
+          <div class="doc-status" id="stat-ine-moral">Pendiente</div>
+        </div>
+        <label class="doc-upload-btn">
+          📎 Seleccionar archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'ine-moral','stat-ine-moral','name-ine-moral')">
+        </label>
+        <div class="doc-file-name" id="name-ine-moral"></div>
+      </div>
+
+      <div class="doc-item" id="doc-dom-moral">
+        <div class="doc-header">
+          <div class="doc-info">
+            <div class="doc-name">🏠 Comprobante de Domicilio</div>
+            <div class="doc-desc">Recibo de servicios no mayor a 3 meses</div>
+            <div class="doc-req">● Obligatorio</div>
+          </div>
+          <div class="doc-status" id="stat-dom-moral">Pendiente</div>
+        </div>
+        <label class="doc-upload-btn">
+          📎 Seleccionar archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'dom-moral','stat-dom-moral','name-dom-moral')">
+        </label>
+        <div class="doc-file-name" id="name-dom-moral"></div>
+      </div>
+
+      <div class="doc-item" id="doc-poder">
+        <div class="doc-header">
+          <div class="doc-info">
+            <div class="doc-name">📋 Poder Notarial</div>
+            <div class="doc-desc">Si el representante no es socio fundador</div>
+            <div class="doc-opt">○ Opcional</div>
+          </div>
+          <div class="doc-status" id="stat-poder">Opcional</div>
+        </div>
+        <label class="doc-upload-btn">
+          📎 Seleccionar archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'poder','stat-poder','name-poder')">
+        </label>
+        <div class="doc-file-name" id="name-poder"></div>
+      </div>
+
+      <div class="doc-item" id="doc-opinion">
+        <div class="doc-header">
+          <div class="doc-info">
+            <div class="doc-name">✅ Opinión de Cumplimiento SAT</div>
+            <div class="doc-desc">Opinión positiva de obligaciones fiscales</div>
+            <div class="doc-opt">○ Opcional</div>
+          </div>
+          <div class="doc-status" id="stat-opinion">Opcional</div>
+        </div>
+        <label class="doc-upload-btn">
+          📎 Seleccionar archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'opinion','stat-opinion','name-opinion')">
+        </label>
+        <div class="doc-file-name" id="name-opinion"></div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTOS PERSONA FÍSICA -->
+    <div id="docs-fisica" style="display:none">
+      <div class="doc-item" id="doc-csf-fisica">
+        <div class="doc-header">
+          <div class="doc-info">
+            <div class="doc-name">🧾 Constancia de Situación Fiscal</div>
+            <div class="doc-desc">Documento actualizado del SAT (no mayor a 3 meses)</div>
+            <div class="doc-req">● Obligatorio</div>
+          </div>
+          <div class="doc-status" id="stat-csf-fisica">Pendiente</div>
+        </div>
+        <label class="doc-upload-btn">
+          📎 Seleccionar archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'csf-fisica','stat-csf-fisica','name-csf-fisica')">
+        </label>
+        <div class="doc-file-name" id="name-csf-fisica"></div>
+      </div>
+
+      <div class="doc-item" id="doc-ine-fisica">
+        <div class="doc-header">
+          <div class="doc-info">
+            <div class="doc-name">🪪 INE / Identificación oficial</div>
+            <div class="doc-desc">Identificación vigente (ambos lados)</div>
+            <div class="doc-req">● Obligatorio</div>
+          </div>
+          <div class="doc-status" id="stat-ine-fisica">Pendiente</div>
+        </div>
+        <label class="doc-upload-btn">
+          📎 Seleccionar archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'ine-fisica','stat-ine-fisica','name-ine-fisica')">
+        </label>
+        <div class="doc-file-name" id="name-ine-fisica"></div>
+      </div>
+
+      <div class="doc-item" id="doc-dom-fisica">
+        <div class="doc-header">
+          <div class="doc-info">
+            <div class="doc-name">🏠 Comprobante de Domicilio</div>
+            <div class="doc-desc">Recibo de servicios no mayor a 3 meses</div>
+            <div class="doc-req">● Obligatorio</div>
+          </div>
+          <div class="doc-status" id="stat-dom-fisica">Pendiente</div>
+        </div>
+        <label class="doc-upload-btn">
+          📎 Seleccionar archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'dom-fisica','stat-dom-fisica','name-dom-fisica')">
+        </label>
+        <div class="doc-file-name" id="name-dom-fisica"></div>
+      </div>
+
+      <div class="doc-item" id="doc-opinion-fisica">
+        <div class="doc-header">
+          <div class="doc-info">
+            <div class="doc-name">✅ Opinión de Cumplimiento SAT</div>
+            <div class="doc-desc">Opinión positiva de obligaciones fiscales</div>
+            <div class="doc-opt">○ Opcional</div>
+          </div>
+          <div class="doc-status" id="stat-opinion-fisica">Opcional</div>
+        </div>
+        <label class="doc-upload-btn">
+          📎 Seleccionar archivo
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'opinion-fisica','stat-opinion-fisica','name-opinion-fisica')">
+        </label>
+        <div class="doc-file-name" id="name-opinion-fisica"></div>
+      </div>
+    </div>
+
+    <button class="btn-next" onclick="goTo(4)">Continuar →</button>
+    <button class="btn-back" onclick="goTo(2)">← Regresar</button>
+  </div>
+
+  <!-- PASO 4: DECLARACIÓN Y ENVÍO -->
+  <div class="section" id="sec4">
+    <div class="section-title">④ Declaración y envío</div>
+
+    <div class="note">Revisa que todos tus datos sean correctos antes de enviar. Una vez enviado, recibirás confirmación por correo.</div>
+
+    <!-- RESUMEN -->
+    <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:16px;border:1px solid var(--border)">
+      <div style="font-size:12px;font-weight:700;color:var(--azul);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Resumen de registro</div>
+      <div id="resumen" style="font-size:13px;line-height:1.8;color:var(--text)"></div>
+    </div>
+
+    <label class="check-wrap">
+      <input type="checkbox" id="declaro">
+      <span>Declaro bajo protesta de decir verdad que la información y documentos proporcionados son verídicos, auténticos y vigentes. Autorizo a MDreieck S.A. de C.V. a verificar dicha información conforme a la Ley Federal para la Prevención e Identificación de Operaciones con Recursos de Procedencia Ilícita.</span>
+    </label>
+
+    <label class="check-wrap">
+      <input type="checkbox" id="aviso">
+      <span>He leído y acepto el Aviso de Privacidad de MDreieck S.A. de C.V. para el tratamiento de mis datos personales.</span>
+    </label>
+
+    <button class="btn-send" id="btnEnviar" onclick="enviar()">
+      <span class="spinner" id="spinnerEnvio"></span>
+      <span id="btnEnviarText">✅ Enviar registro</span>
+    </button>
+    <button class="btn-back" onclick="goTo(3)">← Regresar</button>
+  </div>
+
+  <!-- ÉXITO -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">🎉</div>
+    <h2>¡Registro enviado!</h2>
+    <p>Tu información y documentos fueron enviados correctamente a MDreieck S.A. de C.V.<br><br>
+    Nos pondremos en contacto contigo una vez que validemos tu expediente.<br><br>
+    <strong>Gracias por ser parte de nuestros proveedores.</strong></p>
+  </div>
+
+</main>
+
+<footer>
+  MDreieck S.A. de C.V. · Registro de Proveedores Área Técnica · Confidencial
+</footer>
+
+<script>
+  const APPS_URL   = 'https://script.google.com/macros/s/AKfycbyP9Nw3qJemdh5_5OCpIUVX436AS35Dhn_JCZcOEnDn18RXfNBHIbnkEAZd0NFm2ErX/exec';
+  const FOLDER_ID  = '1nZU5JEP8i2s-7Qyk4r7ZVel-Rwt94VHD';
+  const NOTIF_EMAIL = 'auditoria.externa.mdreieck@gmail.com';
+  const PROYECTO   = 'Proveedores Área Técnica';
+
+  let tipoPersona = 'moral';
+  let archivos    = {};
+
+  // ── TIPO PERSONA ─────────────────────────────────────────
+  function selTipo(tipo) {
+    tipoPersona = tipo;
+    document.getElementById('btn-moral').classList.toggle('selected', tipo === 'moral');
+    document.getElementById('btn-fisica').classList.toggle('selected', tipo === 'fisica');
+    document.getElementById('campos-moral').style.display  = tipo === 'moral'  ? 'block' : 'none';
+    document.getElementById('campos-fisica').style.display = tipo === 'fisica' ? 'block' : 'none';
+    document.getElementById('docs-moral').style.display    = tipo === 'moral'  ? 'block' : 'none';
+    document.getElementById('docs-fisica').style.display   = tipo === 'fisica' ? 'block' : 'none';
+  }
+
+  // ── NAVEGACIÓN ────────────────────────────────────────────
+  function goTo(n) {
+    if (n > 1 && !validarPaso(n - 1)) return;
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById(`sec${i}`).classList.toggle('active', i === n);
+      const ind = document.getElementById(`step-ind-${i}`);
+      ind.classList.remove('active','done');
+      if (i < n)  ind.classList.add('done');
+      if (i === n) ind.classList.add('active');
+    }
+    if (n === 4) buildResumen();
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  // ── VALIDACIÓN ────────────────────────────────────────────
+  function validarPaso(paso) {
+    if (paso === 2) {
+      if (tipoPersona === 'moral') {
+        const campos = ['razonSocial','rfcMoral','giro','direccionMoral','telMoral','emailMoral','repNombre','repRFC','repCargo'];
+        for (const c of campos) {
+          if (!document.getElementById(c).value.trim()) {
+            alert('Por favor completa todos los campos obligatorios.'); return false;
+          }
+        }
+      } else {
+        const campos = ['nombreFisica','rfcFisica','curpFisica','actividadFisica','direccionFisica','telFisica','emailFisica'];
+        for (const c of campos) {
+          if (!document.getElementById(c).value.trim()) {
+            alert('Por favor completa todos los campos obligatorios.'); return false;
+          }
+        }
+      }
+    }
+    if (paso === 3) {
+      const reqs = tipoPersona === 'moral'
+        ? ['acta','csf-moral','ine-moral','dom-moral']
+        : ['csf-fisica','ine-fisica','dom-fisica'];
+      for (const r of reqs) {
+        if (!archivos[r]) {
+          alert('Por favor sube todos los documentos obligatorios.'); return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  // ── ARCHIVO SELECCIONADO ──────────────────────────────────
+  function fileSelected(input, key, statId, nameId) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert('El archivo supera 10 MB. Por favor comprime o selecciona otro.'); return;
+    }
+    archivos[key] = file;
+    const item = input.closest('.doc-item');
+    item.classList.add('uploaded');
+    document.getElementById(statId).textContent = '✓ Listo';
+    const nameEl = document.getElementById(nameId);
+    nameEl.textContent = file.name;
+    nameEl.style.display = 'block';
+  }
+
+  // ── RESUMEN ───────────────────────────────────────────────
+  function buildResumen() {
+    let html = '';
+    if (tipoPersona === 'moral') {
+      html += `<b>Tipo:</b> Persona Moral<br>`;
+      html += `<b>Razón social:</b> ${v('razonSocial')}<br>`;
+      html += `<b>RFC:</b> ${v('rfcMoral')}<br>`;
+      html += `<b>Giro:</b> ${v('giro')}<br>`;
+      html += `<b>Representante:</b> ${v('repNombre')} · ${v('repCargo')}<br>`;
+      html += `<b>Correo:</b> ${v('emailMoral')}<br>`;
+    } else {
+      html += `<b>Tipo:</b> Persona Física<br>`;
+      html += `<b>Nombre:</b> ${v('nombreFisica')}<br>`;
+      html += `<b>RFC:</b> ${v('rfcFisica')}<br>`;
+      html += `<b>CURP:</b> ${v('curpFisica')}<br>`;
+      html += `<b>Actividad:</b> ${v('actividadFisica')}<br>`;
+      html += `<b>Correo:</b> ${v('emailFisica')}<br>`;
+    }
+    html += `<b>Documentos:</b> ${Object.keys(archivos).length} archivo(s) adjunto(s)`;
+    document.getElementById('resumen').innerHTML = html;
+  }
+
+  function v(id) { return document.getElementById(id)?.value?.trim() || '—'; }
+
+  // ── ENVIAR ────────────────────────────────────────────────
+  async function enviar() {
+    if (!document.getElementById('declaro').checked) {
+      alert('Debes aceptar la declaración de veracidad para continuar.'); return;
+    }
+    if (!document.getElementById('aviso').checked) {
+      alert('Debes aceptar el Aviso de Privacidad para continuar.'); return;
+    }
+
+    const btn = document.getElementById('btnEnviar');
+    btn.disabled = true;
+    document.getElementById('spinnerEnvio').classList.add('show');
+    document.getElementById('btnEnviarText').textContent = 'Enviando…';
+
+    try {
+      // Convertir archivos a base64
+      const docsB64 = {};
+      for (const [key, file] of Object.entries(archivos)) {
+        docsB64[key] = {
+          name: file.name,
+          type: file.type,
+          data: await toBase64(file)
+        };
+      }
+
+      const nombre = tipoPersona === 'moral' ? v('razonSocial') : v('nombreFisica');
+      const rfc    = tipoPersona === 'moral' ? v('rfcMoral')    : v('rfcFisica');
+
+      const payload = {
+        accion:      'proveedor',
+        proyecto:    PROYECTO,
+        folderId:    FOLDER_ID,
+        notifEmail:  NOTIF_EMAIL,
+        tipo:        tipoPersona,
+        nombre, rfc,
+        fecha:       new Date().toLocaleDateString('es-MX'),
+        datos: tipoPersona === 'moral' ? {
+          razonSocial: v('razonSocial'), rfc: v('rfcMoral'),
+          giro: v('giro'), direccion: v('direccionMoral'),
+          tel: v('telMoral'), email: v('emailMoral'),
+          repNombre: v('repNombre'), repRFC: v('repRFC'),
+          repCURP: v('repCURP'), repCargo: v('repCargo')
+        } : {
+          nombre: v('nombreFisica'), rfc: v('rfcFisica'),
+          curp: v('curpFisica'), actividad: v('actividadFisica'),
+          direccion: v('direccionFisica'), tel: v('telFisica'),
+          email: v('emailFisica')
+        },
+        documentos: docsB64
+      };
+
+      await fetch(APPS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      // Mostrar éxito
+      document.getElementById('sec4').classList.remove('active');
+      document.getElementById('successScreen').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch(e) {
+      alert('Ocurrió un error al enviar. Por favor intenta de nuevo.');
+      btn.disabled = false;
+      document.getElementById('spinnerEnvio').classList.remove('show');
+      document.getElementById('btnEnviarText').textContent = '✅ Enviar registro';
+    }
+  }
+
+  function toBase64(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result.split(',')[1]);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+  }
+</script>
+</body>
+</html>
