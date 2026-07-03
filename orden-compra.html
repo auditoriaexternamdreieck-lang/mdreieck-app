@@ -5,13 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
   <title>Orden de Compra · MDreieck</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <style>
-    :root {
-      --azul:#1a1080; --azul2:#2e75b6; --azulC:#dce6f0;
-      --text:#1a1a2e; --muted:#5a6a7e; --border:#c8d8e8;
-      --bg:#f4f7fb; --white:#ffffff;
-      --success:#1e8c4e; --danger:#c0392b; --accent:#e8a838;
-    }
+    :root{--azul:#1a1080;--azul2:#2e75b6;--azulC:#dce6f0;--text:#1a1a2e;--muted:#5a6a7e;--border:#c8d8e8;--bg:#f4f7fb;--white:#ffffff;--success:#1e8c4e;--danger:#c0392b;--accent:#e8a838;}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px;}
     header{background:var(--azul);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(26,16,128,.2);}
@@ -33,8 +29,6 @@
     .field textarea{resize:vertical;min-height:60px;}
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
     .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-
-    /* PARTIDAS */
     .partida-row{display:grid;grid-template-columns:36px 70px 1fr 100px 110px 28px;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
     .partida-row:last-child{border-bottom:none;}
     .partida-num{font-size:12px;font-weight:700;color:var(--muted);text-align:center;}
@@ -44,13 +38,9 @@
     .partida-del{background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:2px;}
     .partidas-header{display:grid;grid-template-columns:36px 70px 1fr 100px 110px 28px;gap:6px;margin-bottom:6px;}
     .partidas-header span{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;}
-
-    /* TOTALES */
     .totales{background:var(--bg);border-radius:10px;padding:12px 14px;margin-top:10px;}
     .total-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:14px;}
     .total-row.final{font-size:17px;font-weight:800;color:var(--azul);border-top:2px solid var(--border);margin-top:6px;padding-top:10px;}
-
-    /* DOCS ADJUNTOS */
     .doc-attach{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;}
     .doc-attach.done{border-color:var(--success);background:#f0faf4;}
     .doc-attach-header{display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -59,267 +49,145 @@
     .doc-attach.done .doc-attach-status{background:#d4edda;color:var(--success);}
     .doc-upload-btn{display:block;width:100%;margin-top:8px;padding:8px;border:1.5px dashed var(--azul2);border-radius:7px;background:transparent;color:var(--azul2);font-size:12px;font-weight:600;cursor:pointer;text-align:center;}
     .doc-file-name{font-size:11px;color:var(--success);margin-top:4px;display:none;word-break:break-all;}
-
-    /* BTNS */
     .btn-primary{width:100%;padding:15px;background:var(--azul);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s;}
     .btn-primary:hover{opacity:.9;}
     .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
     .btn-success{background:var(--success);}
-
     .note{font-size:11px;color:var(--muted);background:var(--azulC);border-left:3px solid var(--azul2);border-radius:4px;padding:7px 10px;margin-bottom:12px;line-height:1.5;}
-
     .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite;display:none;}
     .spinner.show{display:inline-block;}
     @keyframes spin{to{transform:rotate(360deg);}}
-
     #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a2e;border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:14px;font-weight:600;color:white;transition:transform .3s;z-index:999;white-space:nowrap;}
     #toast.show{transform:translateX(-50%) translateY(0);}
     #toast.ok{border-color:var(--success);color:var(--success);}
     #toast.err{border-color:var(--danger);color:var(--danger);}
-
     .forma-pago-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px;}
     .forma-btn{border:1.5px solid var(--border);border-radius:8px;padding:8px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;background:white;color:var(--muted);transition:all .15s;}
     .forma-btn.sel{border-color:var(--azul);background:var(--azulC);color:var(--azul);}
-
-    @media(max-width:480px){
-      .row2,.row3{grid-template-columns:1fr;}
-      .partida-row,.partidas-header{grid-template-columns:28px 60px 1fr 80px 90px 24px;}
-    }
   </style>
 </head>
 <body>
-
 <header>
   <div class="logo-wrap">
     <img src="data:image/jpeg;base64,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" alt="MDreieck">
-    <div class="logo-text">
-      <strong>MDreieck</strong>
-      <span>S.A. de C.V.</span>
-    </div>
+    <div class="logo-text"><strong>MDreieck</strong><span>S.A. de C.V.</span></div>
   </div>
   <div class="header-badge">Orden de Compra</div>
 </header>
-
 <main>
-
-  <!-- ① DATOS GENERALES -->
   <div class="card">
     <div class="card-title">① Datos generales</div>
     <div class="row2">
-      <div class="field">
-        <label>No. de Orden <span class="req">*</span></label>
-        <input type="text" id="ocNum" placeholder="OC-0001" readonly style="background:var(--azulC);font-weight:700;color:var(--azul);">
-      </div>
-      <div class="field">
-        <label>Fecha de emisión</label>
-        <input type="date" id="fechaEmision">
-      </div>
+      <div class="field"><label>No. de Orden</label><input type="text" id="ocNum" readonly style="background:var(--azulC);font-weight:700;color:var(--azul);"></div>
+      <div class="field"><label>Fecha de emisión</label><input type="date" id="fechaEmision"></div>
     </div>
     <div class="row2">
-      <div class="field">
-        <label>Fecha de entrega <span class="req">*</span></label>
-        <input type="date" id="fechaEntrega">
-      </div>
-      <div class="field">
-        <label>Proyecto <span class="req">*</span></label>
-        <input type="text" id="proyecto" placeholder="Nombre del proyecto">
-      </div>
+      <div class="field"><label>Fecha de entrega <span class="req">*</span></label><input type="date" id="fechaEntrega"></div>
+      <div class="field"><label>Proyecto <span class="req">*</span></label><input type="text" id="proyecto" placeholder="Nombre del proyecto"></div>
     </div>
     <div class="row2">
-      <div class="field">
-        <label>O.T. No.</label>
-        <input type="text" id="otNum" placeholder="Número de OT">
-      </div>
-      <div class="field">
-        <label>Nombre (responsable)</label>
-        <input type="text" id="responsable" placeholder="Nombre">
-      </div>
+      <div class="field"><label>O.T. No.</label><input type="text" id="otNum" placeholder="Número de OT"></div>
+      <div class="field"><label>Nombre (responsable)</label><input type="text" id="responsable" placeholder="Nombre"></div>
     </div>
-    <div class="field">
-      <label>Lugar de entrega</label>
-      <input type="text" id="lugarEntrega" placeholder="Dirección o lugar de entrega">
-    </div>
+    <div class="field"><label>Lugar de entrega</label><input type="text" id="lugarEntrega" placeholder="Dirección o lugar de entrega"></div>
   </div>
 
-  <!-- ② PROVEEDOR -->
   <div class="card">
     <div class="card-title">② Proveedor</div>
-    <div class="field">
-      <label>Nombre del proveedor <span class="req">*</span></label>
-      <input type="text" id="proveedor" placeholder="Razón social o nombre">
-    </div>
-    <div class="field">
-      <label>Concepto del pago <span class="req">*</span></label>
-      <input type="text" id="concepto" placeholder="Ej: Compra de uniformes técnicos">
-    </div>
+    <div class="field"><label>Nombre del proveedor <span class="req">*</span></label><input type="text" id="proveedor" placeholder="Razón social o nombre"></div>
+    <div class="field"><label>Concepto del pago <span class="req">*</span></label><input type="text" id="concepto" placeholder="Ej: Compra de materiales eléctricos"></div>
     <div class="row2">
-      <div class="field">
-        <label>N° Factura / Cotización</label>
-        <input type="text" id="numFactura" placeholder="Folio">
-      </div>
-      <div class="field">
-        <label>Importe factura / cotización ($)</label>
-        <input type="number" id="importeFactura" placeholder="0.00" min="0" step="0.01">
-      </div>
+      <div class="field"><label>N° Factura / Cotización</label><input type="text" id="numFactura" placeholder="Folio"></div>
+      <div class="field"><label>Importe factura ($)</label><input type="number" id="importeFactura" placeholder="0.00" min="0" step="0.01"></div>
     </div>
   </div>
 
-  <!-- ③ FORMA DE PAGO -->
   <div class="card">
     <div class="card-title">③ Forma de pago</div>
     <div class="forma-pago-opts">
-      <div class="forma-btn sel" onclick="selForma('Transferencia')">💳 Transferencia</div>
-      <div class="forma-btn" onclick="selForma('Cheque')">📋 Cheque</div>
-      <div class="forma-btn" onclick="selForma('Contado')">💵 Contado</div>
+      <div class="forma-btn sel" onclick="selForma('Transferencia',this)">💳 Transferencia</div>
+      <div class="forma-btn" onclick="selForma('Cheque',this)">📋 Cheque</div>
+      <div class="forma-btn" onclick="selForma('Contado',this)">💵 Contado</div>
     </div>
     <input type="hidden" id="formaPago" value="Transferencia">
     <div id="camposCheque" style="display:none;margin-top:8px">
-      <div class="field">
-        <label>No. de Cheque</label>
-        <input type="text" id="numCheque" placeholder="Número de cheque">
-      </div>
+      <div class="field"><label>No. de Cheque</label><input type="text" id="numCheque" placeholder="Número de cheque"></div>
     </div>
-    <div id="camposCredito" style="display:none;margin-top:8px" class="row2">
-      <div class="field">
-        <label>Crédito / Días</label>
-        <input type="number" id="diasCredito" placeholder="30">
-      </div>
-    </div>
-    <div class="field" style="margin-top:10px">
-      <label>Banco</label>
-      <input type="text" id="banco" placeholder="Nombre del banco">
-    </div>
+    <div class="field" style="margin-top:10px"><label>Banco</label><input type="text" id="banco" placeholder="Nombre del banco"></div>
     <div class="row2">
-      <div class="field">
-        <label>Sucursal</label>
-        <input type="text" id="sucursal" placeholder="Sucursal">
-      </div>
-      <div class="field">
-        <label>Número de cuenta</label>
-        <input type="text" id="numCuenta" placeholder="Número de cuenta">
-      </div>
+      <div class="field"><label>Sucursal</label><input type="text" id="sucursal" placeholder="Sucursal"></div>
+      <div class="field"><label>Número de cuenta</label><input type="text" id="numCuenta" placeholder="Número de cuenta"></div>
     </div>
-    <div class="field">
-      <label>CLABE Interbancaria</label>
-      <input type="text" id="clabe" placeholder="18 dígitos" maxlength="18">
-    </div>
+    <div class="field"><label>CLABE Interbancaria</label><input type="text" id="clabe" placeholder="18 dígitos" maxlength="18"></div>
   </div>
 
-  <!-- ④ PARTIDAS -->
   <div class="card">
     <div class="card-title">④ Partidas</div>
     <div class="partidas-header">
-      <span>#</span>
-      <span>Cantidad</span>
-      <span>Descripción</span>
-      <span>P. Unit.</span>
-      <span>Importe</span>
-      <span></span>
+      <span>#</span><span>Cantidad</span><span>Descripción</span><span>P. Unit.</span><span>Importe</span><span></span>
     </div>
     <div id="partidasContainer"></div>
     <button onclick="agregarPartida()" style="width:100%;margin-top:10px;padding:9px;background:transparent;border:1.5px dashed var(--azul2);color:var(--azul2);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">+ Agregar partida</button>
-
     <div class="totales">
-      <div class="total-row">
-        <span>Subtotal</span>
-        <span id="subtotalDisplay">$0.00</span>
-      </div>
-      <div class="total-row">
-        <span>IVA (16%)</span>
-        <span id="ivaDisplay">$0.00</span>
-      </div>
-      <div class="total-row final">
-        <span>TOTAL</span>
-        <span id="totalDisplay">$0.00</span>
-      </div>
+      <div class="total-row"><span>Subtotal</span><span id="subtotalDisplay">$0.00</span></div>
+      <div class="total-row"><span>IVA (16%)</span><span id="ivaDisplay">$0.00</span></div>
+      <div class="total-row final"><span>TOTAL</span><span id="totalDisplay">$0.00</span></div>
     </div>
   </div>
 
-  <!-- ⑤ COMENTARIOS -->
   <div class="card">
-    <div class="card-title">⑤ Comentarios e instrucciones</div>
-    <div class="field">
-      <textarea id="comentarios" placeholder="Comentarios o instrucciones especiales..." style="min-height:80px"></textarea>
-    </div>
+    <div class="card-title">⑤ Comentarios</div>
+    <div class="field"><textarea id="comentarios" placeholder="Comentarios o instrucciones especiales..."></textarea></div>
   </div>
 
-  <!-- ⑥ DOCUMENTOS ADJUNTOS -->
   <div class="card">
-    <div class="card-title">⑥ Documentos a adjuntar</div>
-    <div class="note">Adjunta los documentos del proveedor. Se unirán automáticamente al PDF de la orden de compra.</div>
-
+    <div class="card-title">⑥ Documentos adjuntos</div>
+    <div class="note">Se unirán en orden al PDF final: OC → Cotización → Constancia → Cuenta Bancaria → Otros</div>
     <div class="doc-attach" id="da-cotizacion">
       <div class="doc-attach-header">
-        <div>
-          <div class="doc-attach-name">📄 Cotización / Factura</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">PDF del proveedor</div>
-        </div>
+        <div><div class="doc-attach-name">📄 Cotización / Factura</div><div style="font-size:11px;color:var(--muted)">PDF del proveedor</div></div>
         <div class="doc-attach-status" id="st-cotizacion">Pendiente</div>
       </div>
-      <label class="doc-upload-btn">📎 Seleccionar archivo
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="attachFile(this,'cotizacion','st-cotizacion','fn-cotizacion')">
-      </label>
+      <label class="doc-upload-btn">📎 Seleccionar archivo<input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="attachFile(this,'cotizacion','st-cotizacion','fn-cotizacion')"></label>
       <div class="doc-file-name" id="fn-cotizacion"></div>
     </div>
-
     <div class="doc-attach" id="da-constancia">
       <div class="doc-attach-header">
-        <div>
-          <div class="doc-attach-name">🧾 Constancia de Situación Fiscal</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">SAT del proveedor</div>
-        </div>
+        <div><div class="doc-attach-name">🧾 Constancia de Situación Fiscal</div><div style="font-size:11px;color:var(--muted)">SAT del proveedor</div></div>
         <div class="doc-attach-status" id="st-constancia">Pendiente</div>
       </div>
-      <label class="doc-upload-btn">📎 Seleccionar archivo
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="attachFile(this,'constancia','st-constancia','fn-constancia')">
-      </label>
+      <label class="doc-upload-btn">📎 Seleccionar archivo<input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="attachFile(this,'constancia','st-constancia','fn-constancia')"></label>
       <div class="doc-file-name" id="fn-constancia"></div>
     </div>
-
     <div class="doc-attach" id="da-cuenta">
       <div class="doc-attach-header">
-        <div>
-          <div class="doc-attach-name">🏦 Carátula cuenta bancaria</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">Estado de cuenta del proveedor</div>
-        </div>
+        <div><div class="doc-attach-name">🏦 Carátula cuenta bancaria</div><div style="font-size:11px;color:var(--muted)">Estado de cuenta</div></div>
         <div class="doc-attach-status" id="st-cuenta">Pendiente</div>
       </div>
-      <label class="doc-upload-btn">📎 Seleccionar archivo
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="attachFile(this,'cuenta','st-cuenta','fn-cuenta')">
-      </label>
+      <label class="doc-upload-btn">📎 Seleccionar archivo<input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="attachFile(this,'cuenta','st-cuenta','fn-cuenta')"></label>
       <div class="doc-file-name" id="fn-cuenta"></div>
     </div>
-
     <div class="doc-attach" id="da-otro">
       <div class="doc-attach-header">
-        <div>
-          <div class="doc-attach-name">📋 Otro documento (opcional)</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">Cualquier documento adicional</div>
-        </div>
+        <div><div class="doc-attach-name">📋 Otro documento (opcional)</div></div>
         <div class="doc-attach-status" id="st-otro">Opcional</div>
       </div>
-      <label class="doc-upload-btn">📎 Seleccionar archivo
-        <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="attachFile(this,'otro','st-otro','fn-otro')">
-      </label>
+      <label class="doc-upload-btn">📎 Seleccionar archivo<input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="attachFile(this,'otro','st-otro','fn-otro')"></label>
       <div class="doc-file-name" id="fn-otro"></div>
     </div>
   </div>
 
-  <!-- ⑦ GENERAR -->
   <button class="btn-primary btn-success" id="btnGenerar" onclick="generarOC()">
     <span class="spinner" id="spinnerGen"></span>
-    <span id="btnGenerarText">📄 Generar OC y guardar en Drive</span>
+    <span id="btnGenerarText">📄 Generar PDF completo y guardar en Drive</span>
   </button>
-
 </main>
-
 <div id="toast"></div>
 
 <script>
   const APPS_URL  = 'https://script.google.com/macros/s/AKfycbyd74rCZCKfoX1AcqRMorK0lajHhQ150pBmnNgf3dOrAuyWpWfB-qP4ZXgGkyC5Gt2E/exec';
   const FOLDER_ID = '125hKGQspj0fOMTxg6KDQqb_MiWuN_Q0x';
   const SHEET_ID  = '1_gSJ_Prx2EdVXJkVxorWO-fJY3CdjUpqG2_RD-03cPw';
-
   const FIRMA_MARIEL = 'data:image/jpeg;base64,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';
   const FIRMA_JOSE   = 'data:image/jpeg;base64,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';
   const LOGO_MD      = 'data:image/jpeg;base64,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';
@@ -328,14 +196,11 @@
   let adjuntos = {};
   let consecutivo = 1;
 
-  // ── INIT ──────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
     const hoy = new Date().toISOString().split('T')[0];
     document.getElementById('fechaEmision').value = hoy;
-    cargarConsecutivo();
-    agregarPartida();
-    agregarPartida();
-    agregarPartida();
+    await cargarConsecutivo();
+    agregarPartida(); agregarPartida(); agregarPartida();
   });
 
   async function cargarConsecutivo() {
@@ -343,31 +208,25 @@
       const r = await fetch(APPS_URL + '?accion=getConsec&sheet=' + SHEET_ID);
       const d = await r.json();
       consecutivo = (d.consecutivo || 0) + 1;
-    } catch(e) {
-      consecutivo = 1;
-    }
+    } catch(e) { consecutivo = 1; }
     document.getElementById('ocNum').value = 'OC-' + String(consecutivo).padStart(4,'0');
   }
 
-  // ── FORMA DE PAGO ─────────────────────────────────────────
-  function selForma(forma) {
+  function selForma(forma, el) {
     document.getElementById('formaPago').value = forma;
     document.querySelectorAll('.forma-btn').forEach(b => b.classList.remove('sel'));
-    event.target.classList.add('sel');
+    el.classList.add('sel');
     document.getElementById('camposCheque').style.display = forma === 'Cheque' ? 'block' : 'none';
-    document.getElementById('camposCredito').style.display = forma === 'Crédito' ? 'grid' : 'none';
   }
 
-  // ── PARTIDAS ──────────────────────────────────────────────
   function agregarPartida() {
     partidaCount++;
     const n = partidaCount;
     const div = document.createElement('div');
-    div.className = 'partida-row';
-    div.id = `partida_${n}`;
+    div.className = 'partida-row'; div.id = `partida_${n}`;
     div.innerHTML = `
       <span class="partida-num">${n}</span>
-      <input type="number" class="p-cant" placeholder="0" min="0" step="1" oninput="calcPartida(${n})">
+      <input type="number" class="p-cant" placeholder="0" min="0" oninput="calcPartida(${n})">
       <input type="text" class="p-desc" placeholder="Descripción">
       <input type="number" class="p-unit" placeholder="0.00" min="0" step="0.01" oninput="calcPartida(${n})">
       <span class="partida-monto" id="pm_${n}">$0.00</span>
@@ -381,96 +240,80 @@
   }
 
   function calcPartida(n) {
-    const row = document.getElementById(`partida_${n}`);
+    const row  = document.getElementById(`partida_${n}`);
     const cant = parseFloat(row.querySelector('.p-cant').value) || 0;
     const unit = parseFloat(row.querySelector('.p-unit').value) || 0;
-    const imp  = cant * unit;
-    document.getElementById(`pm_${n}`).textContent = fmt(imp);
+    document.getElementById(`pm_${n}`).textContent = fmt(cant * unit);
     calcTotales();
   }
 
   function calcTotales() {
     let sub = 0;
     document.querySelectorAll('.partida-row').forEach(row => {
-      const cant = parseFloat(row.querySelector('.p-cant').value) || 0;
-      const unit = parseFloat(row.querySelector('.p-unit').value) || 0;
-      sub += cant * unit;
+      sub += (parseFloat(row.querySelector('.p-cant').value)||0) * (parseFloat(row.querySelector('.p-unit').value)||0);
     });
-    const iva   = sub * 0.16;
-    const total = sub + iva;
     document.getElementById('subtotalDisplay').textContent = fmt(sub);
-    document.getElementById('ivaDisplay').textContent      = fmt(iva);
-    document.getElementById('totalDisplay').textContent    = fmt(total);
+    document.getElementById('ivaDisplay').textContent      = fmt(sub*0.16);
+    document.getElementById('totalDisplay').textContent    = fmt(sub*1.16);
   }
 
   function getPartidas() {
     const items = [];
-    document.querySelectorAll('.partida-row').forEach((row, i) => {
-      const cant = parseFloat(row.querySelector('.p-cant').value) || 0;
+    document.querySelectorAll('.partida-row').forEach((row,i) => {
+      const cant = parseFloat(row.querySelector('.p-cant').value)||0;
       const desc = row.querySelector('.p-desc').value.trim();
-      const unit = parseFloat(row.querySelector('.p-unit').value) || 0;
-      if (cant > 0 || desc) {
-        items.push({ num: i+1, cant, desc, unit, imp: cant*unit });
-      }
+      const unit = parseFloat(row.querySelector('.p-unit').value)||0;
+      if (cant>0 || desc) items.push({num:i+1, cant, desc, unit, imp:cant*unit});
     });
     return items;
   }
 
-  // ── ADJUNTOS ──────────────────────────────────────────────
   function attachFile(input, key, statId, nameId) {
-    const file = input.files[0];
-    if (!file) return;
+    const file = input.files[0]; if (!file) return;
     adjuntos[key] = file;
-    const item = input.closest('.doc-attach');
-    item.classList.add('done');
+    input.closest('.doc-attach').classList.add('done');
     document.getElementById(statId).textContent = '✓ Listo';
     const el = document.getElementById(nameId);
-    el.textContent = file.name;
-    el.style.display = 'block';
+    el.textContent = file.name; el.style.display = 'block';
   }
 
-  // ── GENERAR OC ────────────────────────────────────────────
+  // ── GENERAR OC COMPLETA ──────────────────────────────────
   async function generarOC() {
     const proveedor = document.getElementById('proveedor').value.trim();
     const proyecto  = document.getElementById('proyecto').value.trim();
     const concepto  = document.getElementById('concepto').value.trim();
-    if (!proveedor || !proyecto || !concepto) {
-      toast('Completa los campos obligatorios', 'err'); return;
-    }
+    if (!proveedor||!proyecto||!concepto) { toast('Completa los campos obligatorios','err'); return; }
     const partidas = getPartidas();
-    if (!partidas.length) {
-      toast('Agrega al menos una partida', 'err'); return;
-    }
+    if (!partidas.length) { toast('Agrega al menos una partida','err'); return; }
 
     const btn = document.getElementById('btnGenerar');
     btn.disabled = true;
     document.getElementById('spinnerGen').classList.add('show');
-    document.getElementById('btnGenerarText').textContent = 'Generando PDF…';
+    document.getElementById('btnGenerarText').textContent = 'Generando PDF de OC…';
 
     try {
-      // 1. Generar PDF de la OC
-      const pdfBlob = await generarPDF();
-      const pdfB64  = await blobToBase64(pdfBlob);
+      // 1. Generar PDF de la OC con jsPDF
+      const ocBlob = await generarPDFOC();
 
-      // 2. Convertir adjuntos a base64
-      const docsB64 = {};
+      document.getElementById('btnGenerarText').textContent = 'Uniendo documentos…';
+
+      // 2. Unir todos los PDFs con pdf-lib
+      const finalPdfBytes = await unirPDFs(ocBlob);
+
+      document.getElementById('btnGenerarText').textContent = 'Guardando en Drive…';
+
+      // 3. Subir a Drive y registrar en Sheets
+      const ocNum    = document.getElementById('ocNum').value;
+      const finalB64 = arrayBufferToBase64(finalPdfBytes);
+      const docsB64  = {};
       for (const [key, file] of Object.entries(adjuntos)) {
         docsB64[key] = { name: file.name, type: file.type, data: await fileToBase64(file) };
       }
 
-      // 3. Calcular totales
-      const partRows  = getPartidas();
-      const subtotal  = partRows.reduce((s,p) => s + p.imp, 0);
-      const iva       = subtotal * 0.16;
-      const total     = subtotal + iva;
-      const ocNum     = document.getElementById('ocNum').value;
-
+      const subtotal = getPartidas().reduce((s,p)=>s+p.imp,0);
       const payload = {
-        accion:       'ordenCompra',
-        folderId:     FOLDER_ID,
-        sheetId:      SHEET_ID,
-        consecutivo,
-        ocNum,
+        accion:'ordenCompra', folderId:FOLDER_ID, sheetId:SHEET_ID,
+        consecutivo, ocNum,
         fecha:        document.getElementById('fechaEmision').value,
         fechaEntrega: document.getElementById('fechaEntrega').value,
         proveedor, proyecto, concepto,
@@ -483,260 +326,320 @@
         clabe:        document.getElementById('clabe').value,
         numCuenta:    document.getElementById('numCuenta').value,
         comentarios:  document.getElementById('comentarios').value,
-        partidas:     partRows,
+        partidas:     getPartidas(),
         subtotal:     subtotal.toFixed(2),
-        iva:          iva.toFixed(2),
-        total:        total.toFixed(2),
-        pdfOC:        { name: `OC_${ocNum}_${proveedor}.pdf`, type:'application/pdf', data: pdfB64 },
+        iva:          (subtotal*0.16).toFixed(2),
+        total:        (subtotal*1.16).toFixed(2),
+        pdfFinal:     { name:`OC_${ocNum}_${proveedor}.pdf`, type:'application/pdf', data:finalB64 },
         documentos:   docsB64
       };
 
-      document.getElementById('btnGenerarText').textContent = 'Guardando en Drive…';
-
       await fetch(APPS_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
         body: JSON.stringify(payload)
       });
 
-      // 4. Descargar PDF localmente también
-      const url = URL.createObjectURL(pdfBlob);
-      const a   = document.createElement('a');
-      a.href = url;
-      a.download = `OC_${ocNum}_${proveedor}.pdf`;
-      a.click();
+      // 4. Descargar el PDF unido localmente
+      const blob = new Blob([finalPdfBytes], {type:'application/pdf'});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = `OC_${ocNum}_${proveedor}.pdf`; a.click();
 
-      toast('✅ OC generada, guardada en Drive y descargada', 'ok');
+      toast('✅ PDF descargado y guardado en Drive','ok');
       consecutivo++;
       document.getElementById('ocNum').value = 'OC-' + String(consecutivo).padStart(4,'0');
 
     } catch(e) {
       console.error(e);
-      toast('❌ Error al generar. Intenta de nuevo.', 'err');
+      toast('❌ Error: ' + e.message,'err');
     } finally {
       btn.disabled = false;
       document.getElementById('spinnerGen').classList.remove('show');
-      document.getElementById('btnGenerarText').textContent = '📄 Generar OC y guardar en Drive';
+      document.getElementById('btnGenerarText').textContent = '📄 Generar PDF completo y guardar en Drive';
     }
   }
 
-  // ── GENERAR PDF ──────────────────────────────────────────
-  async function generarPDF() {
+  // ── PDF DE LA OC (formato exacto MDreieck) ───────────────
+  async function generarPDFOC() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit:'mm', format:'letter' });
-    const W=215.9, M=10, azul=[26,16,128], azulC=[220,230,240],
-          negro=[0,0,0], blanco=[255,255,255], amarillo=[255,255,0], gris=[245,245,245];
-    let y = 10;
+    const doc = new jsPDF({unit:'mm', format:'letter'});
+    const W=215.9, M=10;
+    const AZUL   = [26,16,128];
+    const AZULC  = [220,230,240];
+    const NEGRO  = [0,0,0];
+    const BLANCO = [255,255,255];
+    const GRIS   = [242,242,242];
+    const AMARILLO=[255,255,0];
 
-    const ocNum     = document.getElementById('ocNum').value;
-    const proveedor = document.getElementById('proveedor').value;
-    const proyecto  = document.getElementById('proyecto').value;
-    const concepto  = document.getElementById('concepto').value;
-    const fecha     = document.getElementById('fechaEmision').value;
-    const fEntrega  = document.getElementById('fechaEntrega').value;
-    const otNum     = document.getElementById('otNum').value;
+    const ocNum      = document.getElementById('ocNum').value;
+    const proveedor  = document.getElementById('proveedor').value;
+    const proyecto   = document.getElementById('proyecto').value;
+    const concepto   = document.getElementById('concepto').value;
+    const fecha      = document.getElementById('fechaEmision').value;
+    const fEntrega   = document.getElementById('fechaEntrega').value;
+    const otNum      = document.getElementById('otNum').value;
     const responsable= document.getElementById('responsable').value;
-    const lugar     = document.getElementById('lugarEntrega').value;
-    const numFact   = document.getElementById('numFactura').value;
-    const forma     = document.getElementById('formaPago').value;
-    const banco     = document.getElementById('banco').value;
-    const clabe     = document.getElementById('clabe').value;
-    const numCuenta = document.getElementById('numCuenta').value;
+    const lugar      = document.getElementById('lugarEntrega').value;
+    const numFact    = document.getElementById('numFactura').value;
+    const impFact    = document.getElementById('importeFactura').value;
+    const forma      = document.getElementById('formaPago').value;
+    const numCheque  = document.getElementById('numCheque').value;
+    const banco      = document.getElementById('banco').value;
+    const sucursal   = document.getElementById('sucursal').value;
+    const numCuenta  = document.getElementById('numCuenta').value;
+    const clabe      = document.getElementById('clabe').value;
     const comentarios= document.getElementById('comentarios').value;
-    const partidas  = getPartidas();
-    const subtotal  = partidas.reduce((s,p) => s+p.imp, 0);
-    const iva       = subtotal * 0.16;
-    const total     = subtotal + iva;
+    const partidas   = getPartidas();
+    const subtotal   = partidas.reduce((s,p)=>s+p.imp,0);
+    const iva        = subtotal * 0.16;
+    const total      = subtotal + iva;
 
-    // ── HEADER ──
-    doc.addImage(LOGO_MD, 'PNG', M, y, 45, 18);
-
-    // Title
-    doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(...negro);
-    doc.text('ORDEN DE COMPRA', W/2, y+8, {align:'center'});
-
-    // OC number box
-    doc.setFillColor(...amarillo);
-    doc.rect(W-M-50, y, 50, 18, 'F');
-    doc.setDrawColor(150,130,0); doc.rect(W-M-50, y, 50, 18);
-    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(...negro);
-    doc.text('ORDEN DE COMPRA No.:', W-M-48, y+7);
-    doc.setFontSize(11);
-    doc.text(ocNum, W-M-48, y+14);
-    y += 22;
-
-    // ── HELPER ──
     const fw = W - M*2;
     const hw = fw/2 - 1;
 
-    function fila(label, val, x, w, fy, h=8, lw=40) {
-      doc.setFillColor(...azulC); doc.rect(x, fy, lw, h, 'F');
-      doc.setFillColor(...blanco); doc.rect(x+lw, fy, w-lw, h, 'F');
-      doc.setDrawColor(180,180,200); doc.rect(x, fy, w, h);
-      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...negro);
-      doc.text(String(label), x+2, fy+5.5);
-      doc.setFont('helvetica','normal');
-      doc.text(String(val||'—').substring(0,52), x+lw+2, fy+5.5);
+    function thin(color=[180,180,200]) {
+      doc.setDrawColor(...color);
+    }
+    function fillRect(x,y,w,h,color) {
+      doc.setFillColor(...color); doc.rect(x,y,w,h,'F');
+    }
+    function label(txt,x,y,w,h,lw,fillLbl=AZULC,fillVal=BLANCO) {
+      thin();
+      fillRect(x,y,lw,h,fillLbl);
+      fillRect(x+lw,y,w-lw,h,fillVal);
+      doc.rect(x,y,w,h);
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...NEGRO);
+      doc.text(txt, x+2, y+h/2+2.5);
+    }
+    function val(txt,x,y,lw) {
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...NEGRO);
+      doc.text(String(txt||'').substring(0,55), x+lw+2, y+5.5);
     }
 
-    // Dates
-    fila('Fecha de Emisión:', fecha, M, hw, y, 8, 38);
-    fila('Fecha de Entrega:', fEntrega, M+hw+2, hw, y, 8, 38);
-    y += 9;
+    let y = 8;
 
-    // Proveedor + Lugar
-    fila('Proveedor:', proveedor, M, hw, y, 8, 25);
-    fila('Lugar de Entrega:', lugar, M+hw+2, hw, y, 8, 38);
-    y += 9;
+    // ── LOGO ──
+    doc.addImage(LOGO_MD,'PNG',M,y,44,20);
 
-    // Concepto + Proyecto
-    fila('Concepto del Pago:', concepto, M, hw, y, 8, 38);
-    fila('Proyecto:', proyecto, M+hw+2, hw, y, 8, 25);
-    y += 9;
+    // ── TITULO CENTRO ──
+    doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(...NEGRO);
+    doc.text('ORDEN DE COMPRA', W/2, y+12, {align:'center'});
 
-    fila('O.T. No.:', otNum, M, hw, y, 8, 25);
-    fila('Nombre:', responsable, M+hw+2, hw, y, 8, 25);
-    y += 9;
+    // ── OC NUMBER (amarillo, esquina derecha) ──
+    fillRect(W-M-52, y, 52, 20, AMARILLO);
+    thin([150,130,0]);
+    doc.rect(W-M-52, y, 52, 20);
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...NEGRO);
+    doc.text('ORDEN DE COMPRA No.:', W-M-50, y+7);
+    doc.setFontSize(13);
+    doc.text(ocNum, W-M-50, y+16);
+    y += 24;
 
-    // Factura + Forma pago
-    fila('N° Factura/Cotización:', numFact, M, hw, y, 8, 44);
-    fila('Forma de Pago:', forma, M+hw+2, hw, y, 8, 30);
-    y += 9;
+    // ── ROW: Fecha emision | Fecha entrega ──
+    label('Fecha de Emisión:',M,y,hw,9,38);
+    val(fecha,M,y,38);
+    label('Fecha de Entrega:',M+hw+2,y,hw,9,38);
+    val(fEntrega,M+hw+2,y,38);
+    y+=9;
 
-    // Datos bancarios
-    fila('Banco:', banco, M, hw, y, 8, 20);
-    fila('Num. Cuenta:', numCuenta, M+hw+2, hw, y, 8, 30);
-    y += 9;
-    fila('CLABE Interbancaria:', clabe, M, fw, y, 8, 44);
-    y += 11;
+    // ── ROW: Proveedor | Lugar entrega ──
+    label('Proveedor:',M,y,hw,9,22);
+    val(proveedor,M,y,22);
+    label('Lugar  Entrega',M+hw+2,y,hw,9,32);
+    val(lugar,M+hw+2,y,32);
+    y+=9;
 
-    // ── PARTIDAS ──
-    doc.setFillColor(...azul); doc.rect(M, y, fw, 8, 'F');
-    doc.setTextColor(...blanco); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
-    doc.text('PARTIDA', M+4, y+5.5);
-    doc.text('CANT.', M+20, y+5.5);
-    doc.text('DESCRIPCIÓN', M+40, y+5.5);
-    doc.text('P. UNITARIO', W-M-54, y+5.5, {align:'right'});
-    doc.text('IMPORTE', W-M-3, y+5.5, {align:'right'});
-    y += 9;
+    // ── SPACER ──
+    y+=2;
 
-    partidas.forEach((p, i) => {
-      const bg = i%2===0 ? blanco : gris;
-      doc.setFillColor(...bg); doc.rect(M, y, fw, 8, 'F');
-      doc.setDrawColor(200,200,210); doc.rect(M, y, fw, 8);
-      doc.setTextColor(...negro); doc.setFont('helvetica','normal'); doc.setFontSize(8);
-      doc.text(String(p.num), M+4, y+5.5);
-      doc.text(String(p.cant), M+22, y+5.5);
-      doc.text(p.desc.substring(0,50), M+38, y+5.5);
-      doc.text(fmt(p.unit), W-M-54, y+5.5, {align:'right'});
+    // ── ROW: Concepto | Proyecto ──
+    label('Concepto del pago',M,y,hw,9,40);
+    val(concepto,M,y,40);
+    label('Proyecto',M+hw+2,y,hw,9,22);
+    val(proyecto,M+hw+2,y,22);
+    y+=9;
+
+    label('',M,y,hw,9,0,BLANCO,BLANCO);
+    val('',M,y,0);
+    label('O.T. No.',M+hw+2,y,hw/2,9,22);
+    val(otNum,M+hw+2,y,22);
+    label('Nombre',M+hw+2+hw/2,y,hw/2,9,22);
+    val(responsable,M+hw+2+hw/2,y,22);
+    y+=9; y+=2;
+
+    // ── ROW: N factura | Importe | USD/MN ──
+    label('N° Factura',M,y,hw*0.55,9,25);
+    val(numFact,M,y,25);
+    label('Importe',M+hw*0.55,y,hw*0.45-1,9,20);
+    val(impFact?fmt(parseFloat(impFact)):'',M+hw*0.55,y,20);
+    label('USD',M+hw+2,y,(fw-hw-2)*0.35,9,10,AZULC,AZULC);
+    label('MN',M+hw+2+(fw-hw-2)*0.35,y,(fw-hw-2)*0.35,9,8,AZULC,AZULC);
+    label(fmt(total),M+hw+2+(fw-hw-2)*0.7,y,(fw-hw-2)*0.3,9,0,BLANCO,BLANCO);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...NEGRO);
+    doc.text(fmt(total), W-M-2, y+6, {align:'right'});
+    y+=9;
+
+    // ── Forma de pago ──
+    label('Forma de pago',M,y,fw,9,30);
+    val(forma,M,y,30);
+    y+=9;
+
+    // Cheque / Transferencia / Contado boxes
+    const bw = fw/3;
+    label('Cheque No.',M,y,bw-1,9,25);
+    val(forma==='Cheque'?numCheque:'',M,y,25);
+    label('Transferencia',M+bw,y,bw-1,9,28);
+    val(forma==='Transferencia'?'X':'',M+bw,y,28);
+    label('Crédito / Días',M+bw*2,y,bw/2-1,9,30);
+    label('Contado',M+bw*2+bw/2,y,bw/2,9,20);
+    val(forma==='Contado'?'X':'',M+bw*2+bw/2,y,20);
+    y+=9; y+=2;
+
+    // ── Datos bancarios ──
+    label('Datos bancarios para transferencia',M,y,fw,8,60);
+    y+=8;
+    label('Banco',M,y,hw,9,15);
+    val(banco+(sucursal?' / Suc: '+sucursal:''),M,y,15);
+    label('Num. Cta',M+hw+2,y,hw,9,22);
+    val(numCuenta,M+hw+2,y,22);
+    y+=9;
+    label('Clabe Interbancaria (dígitos de 3 en 3)',M,y,fw,9,70);
+    val(clabe,M,y,70);
+    y+=9; y+=3;
+
+    // ── TABLA PARTIDAS ──
+    fillRect(M,y,fw,9,AZUL);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(255,255,255);
+    doc.text('Partida',M+3,y+6);
+    doc.text('Cantidad',M+20,y+6);
+    doc.text('Descripción',M+42,y+6);
+    doc.text('P. Unitario',W-M-46,y+6,{align:'right'});
+    doc.text('Importe',W-M-3,y+6,{align:'right'});
+    y+=9;
+
+    partidas.forEach((p,i)=>{
+      fillRect(M,y,fw,9,i%2===0?BLANCO:GRIS);
+      thin();
+      doc.rect(M,y,fw,9);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...NEGRO);
+      doc.text(String(p.num),M+5,y+6);
+      doc.text(String(p.cant),M+22,y+6);
+      doc.text(p.desc.substring(0,48),M+40,y+6);
+      doc.text(fmt(p.unit),W-M-46,y+6,{align:'right'});
       doc.setFont('helvetica','bold');
-      doc.text(fmt(p.imp), W-M-3, y+5.5, {align:'right'});
-      y += 9;
+      doc.text(fmt(p.imp),W-M-3,y+6,{align:'right'});
+      y+=9;
     });
 
-    // Totales
-    y += 2;
-    doc.setFillColor(...gris); doc.rect(W-M-70, y, 70, 8, 'F');
-    doc.setDrawColor(180,180,200); doc.rect(W-M-70, y, 70, 8);
-    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...negro);
-    doc.text('SUBTOTAL', W-M-68, y+5.5);
-    doc.text(fmt(subtotal), W-M-3, y+5.5, {align:'right'});
-    y += 9;
-
-    doc.setFillColor(...gris); doc.rect(W-M-70, y, 70, 8, 'F');
-    doc.rect(W-M-70, y, 70, 8);
-    doc.text('IVA (16%)', W-M-68, y+5.5);
-    doc.text(fmt(iva), W-M-3, y+5.5, {align:'right'});
-    y += 9;
-
-    doc.setFillColor(...azul); doc.rect(W-M-70, y, 70, 10, 'F');
-    doc.setTextColor(...blanco); doc.setFontSize(9.5);
-    doc.text('TOTAL', W-M-68, y+6.5);
-    doc.text(fmt(total), W-M-3, y+6.5, {align:'right'});
-    y += 14;
-
-    // Monto en letra + total (left side)
-    fila('MONTO A PAGAR (importe con letra):', '', M, fw-72, y, 18, 60);
-    y += 20;
-
-    // Comentarios
-    if (comentarios) {
-      doc.setFillColor(...azulC); doc.rect(M, y, fw, 6, 'F');
-      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...negro);
-      doc.text('COMENTARIOS O INSTRUCCIONES ESPECIALES', M+2, y+4);
-      y += 7;
+    // Fill empty rows up to 7 total
+    const emptyRows = Math.max(0, 7-partidas.length);
+    for(let i=0;i<emptyRows;i++){
+      fillRect(M,y,fw,9,(partidas.length+i)%2===0?BLANCO:GRIS);
+      thin(); doc.rect(M,y,fw,9);
       doc.setFont('helvetica','normal'); doc.setFontSize(8);
-      const lines = doc.splitTextToSize(comentarios, fw-4);
-      doc.text(lines, M+2, y+4);
-      y += Math.max(10, lines.length * 5);
+      doc.text(String(partidas.length+i+1),M+5,y+6);
+      y+=9;
     }
-    y += 4;
+    y+=2;
+
+    // ── TOTALES (lado derecho) ──
+    const tw=70;
+    // SUBTOTAL
+    fillRect(W-M-tw,y,tw,9,GRIS); thin(); doc.rect(W-M-tw,y,tw,9);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...NEGRO);
+    doc.text('SUBTOTAL',W-M-tw+3,y+6);
+    doc.text(fmt(subtotal),W-M-3,y+6,{align:'right'});
+    y+=9;
+    // IVA
+    fillRect(W-M-tw,y,tw,9,GRIS); doc.rect(W-M-tw,y,tw,9);
+    doc.text('IVA',W-M-tw+3,y+6);
+    doc.text(fmt(iva),W-M-3,y+6,{align:'right'});
+    y+=9;
+    // TOTAL
+    fillRect(W-M-tw,y,tw,10,AZUL); doc.rect(W-M-tw,y,tw,10);
+    doc.setTextColor(255,255,255); doc.setFontSize(9);
+    doc.text('TOTAL',W-M-tw+3,y+7);
+    doc.text(fmt(total),W-M-3,y+7,{align:'right'});
+    y+=14;
+
+    // Monto con letra (left of totales)
+    label('MONTO A PAGAR:  (Importe con letra)',M,y-14,fw-tw-4,24,55);
+    y+=4;
+
+    // ── COMENTARIOS ──
+    if(comentarios){
+      fillRect(M,y,fw,8,AZULC); thin(); doc.rect(M,y,fw,8);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...NEGRO);
+      doc.text('COMENTARIOS O INSTRUCCIONES ESPECIALES',M+2,y+5.5);
+      y+=8;
+      fillRect(M,y,fw,20,BLANCO); doc.rect(M,y,fw,20);
+      doc.setFont('helvetica','normal');
+      const lines = doc.splitTextToSize(comentarios, fw-4);
+      doc.text(lines,M+2,y+5);
+      y+=22;
+    } else {
+      fillRect(M,y,fw,8,AZULC); thin(); doc.rect(M,y,fw,8);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...NEGRO);
+      doc.text('COMENTARIOS O INSTRUCCIONES ESPECIALES',M+2,y+5.5);
+      y+=8;
+      fillRect(M,y,fw,16,BLANCO); doc.rect(M,y,fw,16);
+      y+=18;
+    }
 
     // ── FIRMAS ──
     const colW = fw/3;
-    const firmaY = y;
+    const firmaY = y+2;
 
     // Mariel (Elaborado)
-    doc.addImage(FIRMA_MARIEL, 'PNG', M+2, firmaY, 40, 18);
-    doc.setDrawColor(...negro);
-    doc.line(M, firmaY+20, M+colW-4, firmaY+20);
-    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...negro);
-    doc.text('Elaborado:', M+colW/2, firmaY+25, {align:'center'});
+    doc.addImage(FIRMA_MARIEL,'JPEG',M+2,firmaY,40,16);
+    doc.setDrawColor(...NEGRO);
+    doc.line(M,firmaY+18,M+colW-4,firmaY+18);
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...NEGRO);
+    doc.text('Elaborado:',M+2,firmaY+23);
     doc.setFont('helvetica','normal');
-    doc.text('MARIEL ROBLES LIRA', M+colW/2, firmaY+30, {align:'center'});
+    doc.text('MARIEL ROBLES LIRA',M+colW/2,firmaY+28,{align:'center'});
 
     // José Luis (Revisado)
-    const jx = M + colW + 2;
-    doc.addImage(FIRMA_JOSE, 'PNG', jx+2, firmaY, 40, 18);
-    doc.line(jx, firmaY+20, jx+colW-4, firmaY+20);
+    const jx = M+colW+2;
+    doc.addImage(FIRMA_JOSE,'JPEG',jx+2,firmaY,40,16);
+    doc.line(jx,firmaY+18,jx+colW-4,firmaY+18);
     doc.setFont('helvetica','bold');
-    doc.text('Revisado:', jx+colW/2, firmaY+25, {align:'center'});
+    doc.text('Revisado:',jx+2,firmaY+23);
     doc.setFont('helvetica','normal');
-    doc.text('JOSÉ LUIS GARCÍA ESTRADA', jx+colW/2, firmaY+30, {align:'center'});
+    doc.text('JOSÉ LUIS GARCÍA ESTRADA',jx+colW/2,firmaY+28,{align:'center'});
 
     // Karla (Autorizado - sin firma)
-    const kx = M + colW*2 + 2;
-    doc.line(kx, firmaY+20, kx+colW-4, firmaY+20);
+    const kx = M+colW*2+2;
+    doc.line(kx,firmaY+18,kx+colW-4,firmaY+18);
     doc.setFont('helvetica','bold');
-    doc.text('Autorizado:', kx+colW/2, firmaY+25, {align:'center'});
+    doc.text('Autroizado:',kx+2,firmaY+23);
     doc.setFont('helvetica','normal');
-    doc.text('KARLA VARGAS PARRALES', kx+colW/2, firmaY+30, {align:'center'});
-
-    // Footer
-    doc.setFontSize(7); doc.setTextColor(150,150,150);
-    doc.text(`MDreieck S.A. de C.V. · Generado: ${new Date().toLocaleString('es-MX')}`, W/2, y+38, {align:'center'});
+    doc.text('KARLA VARGAS PARRALES',kx+colW/2,firmaY+28,{align:'center'});
 
     return doc.output('blob');
   }
 
-  // ── HELPERS ──────────────────────────────────────────────
-  function fmt(n) {
-    return '$' + Number(n).toLocaleString('es-MX', {minimumFractionDigits:2, maximumFractionDigits:2});
-  }
+  // ── UNIR PDFs con pdf-lib ────────────────────────────────
+  async function unirPDFs(ocBlob) {
+    const { PDFDocument } = PDFLib;
+    const finalDoc = await PDFDocument.create();
 
-  function blobToBase64(blob) {
-    return new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result.split(',')[1]);
-      r.onerror = rej;
-      r.readAsDataURL(blob);
-    });
-  }
+    // 1. Agregar OC
+    const ocBytes = await ocBlob.arrayBuffer();
+    const ocDoc   = await PDFDocument.load(ocBytes);
+    const ocPages = await finalDoc.copyPages(ocDoc, ocDoc.getPageIndices());
+    ocPages.forEach(p => finalDoc.addPage(p));
 
-  function fileToBase64(file) {
-    return new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result.split(',')[1]);
-      r.onerror = rej;
-      r.readAsDataURL(file);
-    });
-  }
+    // 2. Agregar documentos adjuntos en orden
+    const orden = ['cotizacion','constancia','cuenta','otro'];
+    for (const key of orden) {
+      if (!adjuntos[key]) continue;
+      const file  = adjuntos[key];
+      const bytes = await file.arrayBuffer();
 
-  function toast(msg, type='ok') {
-    const el = document.getElementById('toast');
-    el.textContent = msg; el.className = `show ${type}`;
-    setTimeout(() => { el.className = ''; }, 3500);
-  }
-</script>
-</body>
-</html>
+      if (file.type === 'application/pdf') {
+        try {
+          const adjDoc   = await PDFDocument.load(bytes);
+          const adjPages = await finalDoc.copyPages(adjDoc, adjDoc.getPageIndices());
+          adjPages.forEach(p => finalDoc.addPag
