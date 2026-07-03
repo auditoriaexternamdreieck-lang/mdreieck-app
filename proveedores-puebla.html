@@ -552,20 +552,20 @@
         <div class="doc-file-name" id="name-poder"></div>
       </div>
 
-      <div class="doc-item" id="doc-opinion">
+      <div class="doc-item" id="doc-cuenta-moral">
         <div class="doc-header">
           <div class="doc-info">
-            <div class="doc-name">✅ Opinión de Cumplimiento SAT</div>
-            <div class="doc-desc">Opinión positiva de obligaciones fiscales</div>
-            <div class="doc-opt">○ Opcional</div>
+            <div class="doc-name">🏦 Carátula de cuenta bancaria</div>
+            <div class="doc-desc">Estado de cuenta o carátula con CLABE y número de cuenta</div>
+            <div class="doc-req">● Obligatorio</div>
           </div>
-          <div class="doc-status" id="stat-opinion">Opcional</div>
+          <div class="doc-status" id="stat-cuenta-moral">Pendiente</div>
         </div>
         <label class="doc-upload-btn">
           📎 Seleccionar archivo
-          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'opinion','stat-opinion','name-opinion')">
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'cuenta-moral','stat-cuenta-moral','name-cuenta-moral')">
         </label>
-        <div class="doc-file-name" id="name-opinion"></div>
+        <div class="doc-file-name" id="name-cuenta-moral"></div>
       </div>
     </div>
 
@@ -619,20 +619,20 @@
         <div class="doc-file-name" id="name-dom-fisica"></div>
       </div>
 
-      <div class="doc-item" id="doc-opinion-fisica">
+      <div class="doc-item" id="doc-cuenta-fisica">
         <div class="doc-header">
           <div class="doc-info">
-            <div class="doc-name">✅ Opinión de Cumplimiento SAT</div>
-            <div class="doc-desc">Opinión positiva de obligaciones fiscales</div>
-            <div class="doc-opt">○ Opcional</div>
+            <div class="doc-name">🏦 Carátula de cuenta bancaria</div>
+            <div class="doc-desc">Estado de cuenta o carátula con CLABE y número de cuenta</div>
+            <div class="doc-req">● Obligatorio</div>
           </div>
-          <div class="doc-status" id="stat-opinion-fisica">Opcional</div>
+          <div class="doc-status" id="stat-cuenta-fisica">Pendiente</div>
         </div>
         <label class="doc-upload-btn">
           📎 Seleccionar archivo
-          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'opinion-fisica','stat-opinion-fisica','name-opinion-fisica')">
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="fileSelected(this,'cuenta-fisica','stat-cuenta-fisica','name-cuenta-fisica')">
         </label>
-        <div class="doc-file-name" id="name-opinion-fisica"></div>
+        <div class="doc-file-name" id="name-cuenta-fisica"></div>
       </div>
     </div>
 
@@ -739,8 +739,8 @@
     }
     if (paso === 3) {
       const reqs = tipoPersona === 'moral'
-        ? ['acta','csf-moral','ine-moral','dom-moral']
-        : ['csf-fisica','ine-fisica','dom-fisica'];
+        ? ['acta','csf-moral','ine-moral','dom-moral','cuenta-moral']
+        : ['csf-fisica','ine-fisica','dom-fisica','cuenta-fisica'];
       for (const r of reqs) {
         if (!archivos[r]) {
           alert('Por favor sube todos los documentos obligatorios.'); return false;
