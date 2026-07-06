@@ -213,7 +213,7 @@ async function loadConsec(){
 }
 
 function selMoneda(m,el){
-  document.getElementById('moneda').value=m;
+  document.getElementById('moneda')?.value||'MXN'=m;
   document.querySelectorAll('#btnMXN,#btnUSD').forEach(b=>b.classList.remove('sel'));
   el.classList.add('sel');
   document.getElementById('campoTipoCambio').style.display=m==='USD'?'block':'none';
@@ -222,8 +222,8 @@ function selMoneda(m,el){
 
 function selForma(f,el){
   document.getElementById('formaPago').value=f;
-  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('sel'));
-  el.classList.add('sel');
+  document.querySelectorAll('.fp .fb').forEach(b=>b.classList.remove('sel'));
+  if(el) el.classList.add('sel');
   document.getElementById('camposCheque').style.display=f==='Cheque'?'block':'none';
 }
 
@@ -381,7 +381,7 @@ async function genPDF(){
   const iva  =sub*.16;
   const total=sub+iva;
   const ocNum=document.getElementById('ocNum').value;
-  const monedaL=document.getElementById('moneda').value;
+  const monedaL=document.getElementById('moneda')?.value||'MXN';
   const tcL=parseFloat(document.getElementById('tipoCambio')?.value)||17.50;
   const totalL=monedaL==='USD'?total*tcL:total;
   const letra=n2l(totalL);
