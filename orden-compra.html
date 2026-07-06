@@ -98,7 +98,18 @@
     <div class="card-title">③ Factura / Cotización</div>
     <div class="row2">
       <div class="field"><label>N° Factura / Cotización</label><input type="text" id="numFactura" placeholder="Folio"></div>
-      <div class="field"><label>Importe de factura ($)</label><input type="number" id="importeFactura" placeholder="0.00" min="0" step="0.01"></div>
+      <div class="field"><label>Moneda</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px">
+          <div class="fb sel" id="btnMXN" onclick="selMoneda('MXN',this)">🇲🇽 MXN</div>
+          <div class="fb" id="btnUSD" onclick="selMoneda('USD',this)">🇺🇸 USD</div>
+        </div>
+        <input type="hidden" id="moneda" value="MXN">
+      </div>
+    </div>
+    <div id="campoTipoCambio" style="display:none;margin-top:8px">
+      <div class="field"><label>Tipo de cambio (1 USD = $ MXN)</label>
+        <input type="number" id="tipoCambio" value="17.50" min="1" step="0.01" oninput="calcTot()">
+      </div>
     </div>
   </div>
 
@@ -174,7 +185,7 @@
 <div id="toast"></div>
 
 <script>
-const APPS_URL  = 'https://script.google.com/macros/s/AKfycbzgOTRQwkpEvKmj_zIsTWQbwb6tkO535GbbzeEaRy0IRnXV2KaiWhhUVoI-9TsHfOBE/exec';
+const APPS_URL  = 'https://script.google.com/macros/s/AKfycbwOxJkJvhMh0LCeluFGRYlmU6hlHyhWo6uJes2VCM-aI2B1b9GImP0YBbe6DAuweEF9/exec';
 const FOLDER_ID = '125hKGQspj0fOMTxg6KDQqb_MiWuN_Q0x';
 const SHEET_ID  = '1_gSJ_Prx2EdVXJkVxorWO-fJY3CdjUpqG2_RD-03cPw';
 const FIRMA_M   = 'data:image/jpeg;base64,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';
@@ -199,6 +210,14 @@ async function loadConsec(){
     consec=(d.consecutivo||0)+1;
   }catch(e){consec=1;}
   document.getElementById('ocNum').value='OC-VER-'+String(consec).padStart(3,'0');
+}
+
+function selMoneda(m,el){
+  document.getElementById('moneda').value=m;
+  document.querySelectorAll('#btnMXN,#btnUSD').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('campoTipoCambio').style.display=m==='USD'?'block':'none';
+  calcTot();
 }
 
 function selForma(f,el){
@@ -236,10 +255,13 @@ function calcTot(){
   document.querySelectorAll('.partida-row').forEach(r=>{
     s+=(parseFloat(r.querySelector('.pc').value)||0)*(parseFloat(r.querySelector('.pu').value)||0);
   });
-  document.getElementById('dSub').textContent=fmt(s);
-  document.getElementById('dIva').textContent=fmt(s*.16);
-  document.getElementById('dTot').textContent=fmt(s*1.16);
-  document.getElementById('letraPreview').textContent='Importe con letra: '+n2l(s*1.16);
+  const moneda=document.getElementById('moneda')?.value||'MXN';
+  const tc=parseFloat(document.getElementById('tipoCambio')?.value)||17.50;
+  const sMXN=moneda==='USD'?s*tc:s;
+  document.getElementById('dSub').textContent=fmt(s)+(moneda==='USD'?' USD':'');
+  document.getElementById('dIva').textContent=fmt(sMXN*.16)+' MXN';
+  document.getElementById('dTot').textContent=fmt(sMXN*1.16)+' MXN';
+  document.getElementById('letraPreview').textContent='Importe con letra: '+n2l(sMXN*1.16);
 }
 
 function getPartidas(){
@@ -278,10 +300,15 @@ async function generar(){
     const ocBlob=await genPDF();
     document.getElementById('btnTxt').textContent='Uniendo documentos…';
     const finalBytes=await mergePDFs(ocBlob);
-    document.getElementById('btnTxt').textContent='Guardando en Drive…';
+    document.getElementById('btnTxt').textContent='Preparando envío…';
 
     const ocNum=document.getElementById('ocNum').value;
     const sub=parts.reduce((s,p)=>s+p.imp,0);
+    const monedaV=document.getElementById('moneda')?.value||'MXN';
+    const tcV=parseFloat(document.getElementById('tipoCambio')?.value)||17.50;
+    const subMXN=monedaV==='USD'?sub*tcV:sub;
+    const pdfName=`${ocNum}_${prov}.pdf`;
+    const finalB64=ab2b64(finalBytes);
     const docsB64={};
     for(const[k,f] of Object.entries(docs)){
       docsB64[k]={name:f.name,type:f.type,data:await f2b64(f)};
@@ -354,7 +381,10 @@ async function genPDF(){
   const iva  =sub*.16;
   const total=sub+iva;
   const ocNum=document.getElementById('ocNum').value;
-  const letra=n2l(total);
+  const monedaL=document.getElementById('moneda').value;
+  const tcL=parseFloat(document.getElementById('tipoCambio')?.value)||17.50;
+  const totalL=monedaL==='USD'?total*tcL:total;
+  const letra=n2l(totalL);
 
   // helpers
   const thin=()=>doc.setDrawColor(180,180,200);
@@ -459,11 +489,25 @@ async function genPDF(){
   hdr('Importe',cE,y,cF-cE,h14,AZC);
   fill(BLN); rect(cF,y,cG-cF,h14); thin(); rect(cE,y,cG-cE,h14,'S');
   doc.text(iFact?fmt(parseFloat(iFact)):'',cF+1,y+h14/2+1.5);
-  hdr('USD',cG,y,(cH-cG)/2,h14,BLN);
-  hdr('MN',cG+(cH-cG)/2,y,(cH-cG)/2,h14,BLN);
+  const monedaP=document.getElementById('moneda')?.value||'MXN';
+  const tcP=parseFloat(document.getElementById('tipoCambio')?.value)||17.50;
+  const totalMXN=monedaP==='USD'?total*tcP:total;
+  // USD box
+  if(monedaP==='USD'){fill(AZL);}else{fill(BLN);}
+  rect(cG,y,(cH-cG)/2,h14);
+  thin(); rect(cG,y,(cH-cG)/2,h14,'S');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7);
+  doc.setTextColor(monedaP==='USD'?255:0,monedaP==='USD'?255:0,monedaP==='USD'?255:0);
+  doc.text('USD',cG+(cH-cG)/4,y+h14/2+1.5,{align:'center'});
+  // MXN box
+  if(monedaP==='MXN'){fill(AZL);}else{fill(BLN);}
+  rect(cG+(cH-cG)/2,y,(cH-cG)/2,h14);
+  thin(); rect(cG+(cH-cG)/2,y,(cH-cG)/2,h14,'S');
+  doc.setTextColor(monedaP==='MXN'?255:0,monedaP==='MXN'?255:0,monedaP==='MXN'?255:0);
+  doc.text('MN',cG+(cH-cG)*3/4,y+h14/2+1.5,{align:'center'});
   fill(BLN); rect(cH,y,cEND-cH,h14); thin(); rect(cG,y,cEND-cG,h14,'S');
-  doc.setFont('helvetica','bold'); doc.setFontSize(8);
-  doc.text(fmt(total),cEND-1.5,y+h14/2+1.5,{align:'right'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...NGR);
+  doc.text(fmt(totalMXN),cEND-1.5,y+h14/2+1.5,{align:'right'});
   y+=h14+1;
 
   // ── ROW 15-17: TRANSFERENCIA / Forma de pago ─────────────
@@ -562,25 +606,30 @@ async function genPDF(){
   doc.text(letraLines,cA+1.5,y+16);
 
   // SUBTOTAL
+  const monedaT=document.getElementById('moneda')?.value||'MXN';
+  const tcT=parseFloat(document.getElementById('tipoCambio')?.value)||17.50;
+  const subMXN=monedaT==='USD'?sub*tcT:sub;
+  const ivaMXN=subMXN*.16;
+  const totMXN=subMXN*1.16;
   hdr('SUBTOTAL',cG,y,cH-cG,7,BLN);
   fill(BLN); rect(cH,y,cEND-cH,7); thin(); rect(cG,y,cEND-cG,7,'S');
-  doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
-  doc.text(fmt(sub),cEND-1.5,y+5,{align:'right'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...NGR);
+  doc.text(fmt(sub)+(monedaT==='USD'?' USD':''),cEND-1.5,y+5,{align:'right'});
   y+=7;
   // IVA
-  fill(NGR); rect(cG,y,cH-cG,7); // dark bg for label
+  fill(NGR); rect(cG,y,cH-cG,7);
   fill(BLN); rect(cH,y,cEND-cH,7); thin(); rect(cG,y,cEND-cG,7,'S');
   doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(255,255,255);
   doc.text('IVA',cG+1.5,y+5);
   doc.setTextColor(...NGR); doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
-  doc.text(fmt(iva),cEND-1.5,y+5,{align:'right'});
+  doc.text(fmt(ivaMXN)+' MXN',cEND-1.5,y+5,{align:'right'});
   y+=7;
   // TOTAL
   fill(NGR); rect(cG,y,cH-cG,8);
   fill(NGR); rect(cH,y,cEND-cH,8); thin(); rect(cG,y,cEND-cG,8,'S');
   doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(255,255,255);
   doc.text('TOTAL',cG+1.5,y+5.5);
-  doc.text(fmt(total),cEND-1.5,y+5.5,{align:'right'});
+  doc.text(fmt(totMXN)+' MXN',cEND-1.5,y+5.5,{align:'right'});
   y+=10;
 
   // ── COMENTARIOS ──────────────────────────────────────────
