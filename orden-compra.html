@@ -545,30 +545,33 @@ async function genPDF(){
   y+=6;
   fill(BLN); rect(cA,y,cEND-cA,5); thin(); rect(cA,y,cEND-cA,5,'S'); // spacer
   y+=5;
-  // Banco label + value
-  fill(AZC); rect(cA,y,cB-cA,7);
-  fill(BLN); rect(cB,y,cC-cB,7);
-  thin(); rect(cA,y,cC-cA,7,'S');
+  // Fila: Banco | Suc | Num. Cta — cada uno con lbl+val en su propia celda
+  const bancoW = 50, sucW = 25, ctaLblW = 20;
+  const bx = cA, sx = cA+bancoW, cx = cA+bancoW+sucW;
+  // Banco
+  fill(AZC); rect(bx,y,15,7);
+  fill(BLN); rect(bx+15,y,bancoW-15,7);
+  thin(); rect(bx,y,bancoW,7,'S');
   doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...NGR);
-  doc.text('Banco',cA+1.5,y+5);
-  doc.setFontSize(8);
-  doc.text(banco,cB+1.5,y+5);
-  // Suc label + value
-  fill(AZC); rect(cC,y,cD-cC,7);
-  fill(BLN); rect(cD,y,cE-cD,7);
-  thin(); rect(cC,y,cE-cC,7,'S');
+  doc.text('Banco',bx+1.5,y+5);
+  doc.setFontSize(7.5);
+  doc.text((banco||'').substring(0,14),bx+16,y+5);
+  // Suc
+  fill(AZC); rect(sx,y,12,7);
+  fill(BLN); rect(sx+12,y,sucW-12,7);
+  thin(); rect(sx,y,sucW,7,'S');
   doc.setFontSize(6.5);
-  doc.text('Suc',cC+1.5,y+5);
-  doc.setFontSize(8);
-  doc.text(suc||'',cD+1.5,y+5);
-  // Num Cta label + value
-  fill(AZC); rect(cE,y,cF-cE,7);
-  fill(BLN); rect(cF,y,cEND-cF,7);
-  thin(); rect(cE,y,cEND-cE,7,'S');
+  doc.text('Suc',sx+1.5,y+5);
+  doc.setFontSize(7.5);
+  doc.text((suc||'').substring(0,6),sx+13,y+5);
+  // Num Cta
+  fill(AZC); rect(cx,y,ctaLblW,7);
+  fill(BLN); rect(cx+ctaLblW,y,cEND-cx-ctaLblW,7);
+  thin(); rect(cx,y,cEND-cx,7,'S');
   doc.setFontSize(6.5);
-  doc.text('Num. Cta',cE+1.5,y+5);
-  doc.setFontSize(8);
-  doc.text(nCta,cF+1.5,y+5);
+  doc.text('Num. Cta',cx+1.5,y+5);
+  doc.setFontSize(7.5);
+  doc.text((nCta||'').substring(0,20),cx+ctaLblW+1,y+5);
   y+=7;
   hdr('Clabe Interbancaria (Colocar digitos de 3 en 3)',cA,y,cG-cA,7,AZC);
   fill(BLN); rect(cG,y,cEND-cG,7); thin(); rect(cA,y,cEND-cA,7,'S');
