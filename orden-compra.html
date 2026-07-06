@@ -205,9 +205,9 @@ document.addEventListener('DOMContentLoaded',async()=>{
 
 async function loadConsec(){
   try{
-    const r=await fetch(APPS_URL+'?accion=getConsec&sheet='+SHEET_ID);
-    const d=await r.json();
-    consec=(d.consecutivo||0)+1;
+    // Use localStorage for consecutive number
+    const stored = parseInt(localStorage.getItem('oc_ver_consec')||'0');
+    consec = stored + 1;
   }catch(e){consec=1;}
   document.getElementById('ocNum').value='OC-VER-'+String(consec).padStart(3,'0');
 }
@@ -342,6 +342,7 @@ async function generar(){
     const a=document.createElement('a'); a.href=url; a.download=`OC_${ocNum}_${prov}.pdf`; a.click();
     toast('✅ PDF descargado y guardado en Drive','ok');
     consec++;
+    localStorage.setItem('oc_ver_consec', consec-1);
     document.getElementById('ocNum').value='OC-VER-'+String(consec).padStart(3,'0');
   }catch(e){
     console.error(e); toast('❌ '+e.message,'err');
@@ -368,9 +369,9 @@ async function genPDF(){
   const otNum=document.getElementById('otNum').value;
   const resp =document.getElementById('responsable').value;
   const nFact=document.getElementById('numFactura').value;
-  const iFact=document.getElementById('importeFactura').value;
+  const iFact=document.getElementById('importeFactura')?.value||'';
   const forma=document.getElementById('formaPago').value;
-  const nCheq=document.getElementById('numCheque').value;
+  const nCheq=document.getElementById('numCheque')?.value||'';
   const banco=document.getElementById('banco').value;
   const suc  =document.getElementById('sucursal').value;
   const nCta =document.getElementById('numCuenta').value;
