@@ -213,10 +213,12 @@ async function loadConsec(){
 }
 
 function selMoneda(m,el){
-  document.getElementById('moneda')?.value||'MXN'=m;
+  const mEl = document.getElementById('moneda');
+  if(mEl) mEl.value = m;
   document.querySelectorAll('#btnMXN,#btnUSD').forEach(b=>b.classList.remove('sel'));
-  el.classList.add('sel');
-  document.getElementById('campoTipoCambio').style.display=m==='USD'?'block':'none';
+  if(el) el.classList.add('sel');
+  const tc = document.getElementById('campoTipoCambio');
+  if(tc) tc.style.display = m==='USD' ? 'block' : 'none';
   calcTot();
 }
 
