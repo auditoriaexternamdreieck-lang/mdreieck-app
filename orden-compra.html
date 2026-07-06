@@ -545,15 +545,30 @@ async function genPDF(){
   y+=6;
   fill(BLN); rect(cA,y,cEND-cA,5); thin(); rect(cA,y,cEND-cA,5,'S'); // spacer
   y+=5;
-  hdr('Banco',cA,y,cC-cA,7,AZC);
-  fill(BLN); rect(cC,y,cD-cC,7); // Suc label
-  hdr('Suc',cC,y,cD-cC,7,BLN);
-  hdr('Num. Cta',cD,y,cG-cD,7,BLN);
-  fill(BLN); rect(cG,y,cEND-cG,7);
-  thin(); rect(cA,y,cEND-cA,7,'S');
+  // Banco label + value
+  fill(AZC); rect(cA,y,cB-cA,7);
+  fill(BLN); rect(cB,y,cC-cB,7);
+  thin(); rect(cA,y,cC-cA,7,'S');
+  doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...NGR);
+  doc.text('Banco',cA+1.5,y+5);
   doc.setFontSize(8);
-  doc.text(banco+(suc?' / '+suc:''),cA+cC-cA+1,y+5);
-  doc.text(nCta,cD+1,y+5);
+  doc.text(banco,cB+1.5,y+5);
+  // Suc label + value
+  fill(AZC); rect(cC,y,cD-cC,7);
+  fill(BLN); rect(cD,y,cE-cD,7);
+  thin(); rect(cC,y,cE-cC,7,'S');
+  doc.setFontSize(6.5);
+  doc.text('Suc',cC+1.5,y+5);
+  doc.setFontSize(8);
+  doc.text(suc||'',cD+1.5,y+5);
+  // Num Cta label + value
+  fill(AZC); rect(cE,y,cF-cE,7);
+  fill(BLN); rect(cF,y,cEND-cF,7);
+  thin(); rect(cE,y,cEND-cE,7,'S');
+  doc.setFontSize(6.5);
+  doc.text('Num. Cta',cE+1.5,y+5);
+  doc.setFontSize(8);
+  doc.text(nCta,cF+1.5,y+5);
   y+=7;
   hdr('Clabe Interbancaria (Colocar digitos de 3 en 3)',cA,y,cG-cA,7,AZC);
   fill(BLN); rect(cG,y,cEND-cG,7); thin(); rect(cA,y,cEND-cA,7,'S');
